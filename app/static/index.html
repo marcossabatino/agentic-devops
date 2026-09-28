@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Agentic DevOps Lab</title>
+  <link rel="stylesheet" href="/assets/app.css">
+  <script src="/assets/app.js" defer></script>
+</head>
+<body>
+  <main>
+    <header>
+      <p class="eyebrow">AGENTIC DEVOPS / LOCAL LAB</p>
+      <span class="badge">SIMULATED</span>
+      <h1>Inspect an orders diagnosis.</h1>
+      <p class="intro">Choose a scenario, run a diagnosis, and inspect the evidence behind the result.</p>
+      <p class="muted">Scripted responses and synthetic data. No LLM, cloud access, or service restarts.</p>
+    </header>
+
+    <section class="panel" aria-labelledby="new-run">
+      <h2 id="new-run">New diagnosis</h2>
+      <form id="run-form">
+        <label for="scenario">Orders scenario</label>
+        <select id="scenario" name="scenario">
+          <option value="healthy">Healthy service</option>
+          <option value="orders-errors">Service returning errors</option>
+        </select>
+        <label for="question">Operational question</label>
+        <textarea id="question" name="question" maxlength="1000" rows="3" required>Why is the orders service returning errors?</textarea>
+        <p class="hint">The question is recorded with the run. This adapter always calls the health tool; it does not interpret the text.</p>
+        <button type="submit" id="submit">Run simulated diagnosis</button>
+      </form>
+      <p id="request-status" role="status" aria-live="polite"></p>
+    </section>
+
+    <section id="result" class="panel" aria-labelledby="result-title" hidden>
+      <div class="section-title"><h2 id="result-title">Execution result</h2><span class="badge">SIMULATED</span></div>
+      <p id="summary" class="summary"></p>
+      <dl class="facts">
+        <div><dt>Execution</dt><dd id="run-status"></dd></div>
+        <div><dt>Orders service</dt><dd id="outcome"></dd></div>
+        <div><dt>Duration</dt><dd id="duration"></dd></div>
+        <div><dt>Started (UTC)</dt><dd id="started"></dd></div>
+      </dl>
+      <p class="muted">A completed diagnosis can identify an unhealthy service.</p>
+      <dl><dt>Run ID</dt><dd id="run-id" class="mono"></dd><dt>Source revision</dt><dd id="revision" class="mono"></dd></dl>
+      <h3>Tool calls</h3>
+      <ol id="steps"></ol>
+      <p id="run-error" role="alert" hidden></p>
+      <details><summary>Full execution record</summary><pre id="raw-result"></pre></details>
+    </section>
+
+    <footer>
+      <p>Local learning increment · In-memory history: latest 100 runs · Restarting the app clears history.</p>
+      <p id="build-info">Loading build information…</p>
+    </footer>
+  </main>
+</body>
+</html>

@@ -2,7 +2,32 @@
 
 ## Last verified checkpoint — 2026-09-27
 
-Repository connection, environment inspection, and the QEMU preflight implementation are complete. Eight preflight tests pass. The real host `make doctor` reports one failure: OpenTofu is missing. No application or infrastructure acceptance scenario has been executed. T01 remains partial until the missing prerequisite is resolved.
+T01 is complete: OpenTofu 1.10.6 is installed and the real host `make doctor` passes with zero failures. T02 is complete within its local scope: the SIMULATED interface executes a deterministic health-tool call, exposes its evidence, and retains results by run ID in memory. All 23 tests pass; A04 passed through local HTTP, and the interface passed a Chromium walkthrough. Kubernetes and the remaining acceptance criteria are not yet validated.
+
+### Current completion evidence
+
+- OpenTofu installed under `~/.local/share/opentofu/1.10.6`, with `~/.local/bin/tofu` pointing to the binary. The official standalone installer was inspected and run without root privileges, with verification enabled and a temporary GPG home.
+- Verified archive: `tofu_1.10.6_linux_amd64.zip`; SHA-256 `15b7bed76420b50da3e121769c43341df8cd57d751ca14e6dbe9c850124c6dac`. The signed checksums verified against fingerprint `E3E6E43D84CB852EADB0051D0C0AF313E5FD9F80`. Source: [official installation procedure](https://opentofu.org/docs/intro/install/standalone/).
+- `make doctor` outside the sandbox exited 0: host capacity, KVM, and all pinned CLIs passed. The absent lab profile and unset/outside current context remain informational.
+- `make test` passed 23 tests: eight preflight tests, seven execution/store/tool tests, and eight HTTP integration tests. HTTP tests bind temporary localhost ports and shut down afterwards.
+- `node --check app/static/app.js` passed.
+- `make verify-local` exited 0 and wrote `artifacts/a04-local.json`. All ten checks passed: creation, mode, completion, outcome, no execution error, UUID, tool call, tool completion, healthy evidence, and retrieval by ID. Run ID: `ed646d5e-5394-47b3-950a-f52d3aae7554`; source revision: `0271ae70b42c-dirty`.
+- Chromium walkthrough passed: healthy and degraded scenarios via the actual form, unique IDs, visible tool evidence, question text rendered without executing HTML, 390px layout without horizontal overflow, visible HTTP failure/re-enabled submit, and no page JavaScript errors. Evidence is in ignored `artifacts/t02-browser.json`, `artifacts/t02-desktop.png`, and `artifacts/t02-mobile.png`. Playwright was used from a temporary environment, not added as an application dependency.
+- Browser run IDs: healthy `888a2669-f4c9-4e9c-8687-7b2128745314`; degraded `29686773-696b-4289-9dc2-2d4e5898551e`. Screenshots were inspected for layout.
+- The application binds only to `127.0.0.1`; no lab VM was created and no existing cluster/profile/context was changed. Test servers were stopped after validation.
+
+Run the demo with `make run`, then open `http://127.0.0.1:8080`. See [LOCAL_DEMO.md](LOCAL_DEMO.md) and [ADR 0002](decisions/0002-local-simulated-execution.md). This record accompanies the T01/T02 implementation checkpoint.
+
+### End-of-session handoff
+
+The user ended today's learning session after T01/T02 and requested committing and
+pushing the pending work to `origin/main`. Resume with T03 at the next session:
+review the completed-diagnosis/degraded-service distinction, then agree on the
+PostgreSQL schema and atomic job-claim/lease contract before implementation.
+Do not repeat repository setup, the QEMU decision, OpenTofu installation, or T02
+implementation. Existing validation evidence is recorded above; rerun checks when
+code changes or the environment warrants it. No lab cluster or demo server was
+left running by this implementation session.
 
 ### Repository evidence
 
@@ -14,7 +39,7 @@ Repository connection, environment inspection, and the QEMU preflight implementa
 - `AGENTS.md`, `docs/IMPLEMENTATION_PLAN.md`, and `docs/PROGRESS.md` were absent before this session. This plan and progress record were created from the PRD and observed evidence; they do not reconstruct unknown prior work. No `AGENTS.md` was created.
 - The scope baseline is currently named `docs/prd.md`, with lowercase letters; `docs/PRD.md` is not a separate file.
 
-### Environment evidence
+### Initial environment evidence (before T01 completion)
 
 | Check | Observed result |
 |---|---|
@@ -40,24 +65,25 @@ Sandbox restrictions initially prevented GitHub DNS access, Docker socket access
 ### Decision boundary and next task
 
 - Confirmed scope: local M1 with deterministic simulation; AWS remains M2.
-- Repository destination is known. The user has explicitly requested committing and publishing all project files, excluding ignored local artifacts and credentials.
+- Repository destination is known. The previous documentation/preflight baseline was published in commit `0271ae70b42c4efb5aa93b9a6744fe6f4a72a291`, confirmed at `origin/main`; this checkpoint adds the completed local T01/T02 increment.
 - The user selected QEMU. Use driver `qemu2` and network `builtin` in a dedicated `agentic-devops` profile; see [ADR 0001](decisions/0001-qemu-lab-profile.md). Do not ask for the driver choice again.
 - Added `config/lab.json`, `scripts/doctor.py`, `Makefile`, eight preflight tests, documentation, and ignores for research cache, Python artifacts, local secrets, and IaC state/plans.
 - QEMU and qemu-img both report 9.2.4. Read/write access to `/dev/kvm` passed outside the execution sandbox.
-- `make test`: eight tests passed, covering missing tools, version formats/mismatch, timeout handling, malformed inventories, unrelated profiles, conflicting lab profiles, and a matching stopped profile.
-- `make doctor` outside the sandbox: capacity, KVM access, and all installed pinned tools passed. OpenTofu failed as absent from PATH. The doctor script exits 1; GNU Make reports exit 2 for the failing target. The absent lab profile and unset/outside current context are informational.
+- The initial eight preflight tests passed; the suite now includes 23 tests as recorded above.
+- The initial doctor failure for missing OpenTofu is resolved; the current host check passes.
 - Exact CLI pins are recorded, and Minikube 1.34 support plus kubectl version skew were checked against official sources. Full QEMU/Kubernetes/Calico/Helm/provider integration has not been tested.
-- Next task: install and verify OpenTofu 1.10.6, rerun `make doctor`, and then proceed to the minimal simulated execution in T02. Tool installation was not performed in this checkpoint.
-- Learning question before the next increment: why does VM isolation not replace pod NetworkPolicies or service authorization?
+- T02 uses a synchronous runner, separate adapter/tool/simulator components within one process, and a bounded in-memory store. The question is recorded but not interpreted. No LLM, shell, service restart, or external operational action is available.
+- Next task is T03: define the PostgreSQL schema and atomic job-claim/lease contract, then implement durable execution and service authorization. Approval binding and idempotency follow before any simulated state-changing tool is exposed.
+- Learning question before the next increment: why can a diagnosis be completed while the orders service is degraded, and how should monitoring distinguish those outcomes?
 - No lab VM was created, and no existing profile or Kubernetes context was changed. The preflight checkpoint itself did not include a commit or push.
-- Deferred: tool installation, cluster creation, application code, Ansible/OpenTofu/Helm implementation, CI, acceptance tests, and AWS integration.
+- Deferred: PostgreSQL, distributed worker/services, authentication/scopes, approval/idempotency, dependency deadlines/retries, cluster creation, Ansible/OpenTofu/Helm implementation, full telemetry, CI, remaining acceptance scenarios, and AWS integration.
 
 Resume by reading this record, the implementation plan, and `docs/prd.md`; inspect the working-tree diff. Do not repeat repository setup or the full host inventory unless the environment has changed.
 
-### Repository documentation and publication preparation
+### Previous repository documentation and publication
 
 - Expanded the English README to describe the project, implemented functionality, planned architecture, prerequisites, available commands, isolation design, roadmap, documentation, and license.
 - Expanded `.gitignore` for Python caches/environments, local credentials, kubeconfigs, IaC state/plans, Ansible runtime files, Helm dependencies, QEMU images, runtime databases, research cache, and editor artifacts. Dependency lock files and sanitized examples remain eligible for version control.
 - Updated the PRD repository reference to the destination supplied by the user.
 - Validation before publication: `make test` passed all eight tests; 25 representative local/artifact paths were confirmed ignored and 17 source/example/lock paths confirmed retained. Whitespace, local documentation links, and a scan for common credential formats passed. `git fetch origin` confirmed no divergence from `origin/main` before the commit.
-- Publication target: `origin/main`. The user explicitly authorized the commit and push. Publication outcome must be verified against the remote commit; preparation alone is not evidence of a successful push.
+- The user authorized publication to `origin/main`; commit `0271ae70b42c4efb5aa93b9a6744fe6f4a72a291` was pushed successfully and independently confirmed with `git ls-remote origin refs/heads/main`.

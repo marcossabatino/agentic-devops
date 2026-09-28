@@ -6,8 +6,8 @@ Work through one guided learning increment at a time. Before an important archit
 
 | Task | Status | Deliverable and validation | Acceptance criteria |
 |---|---|---|---|
-| T01 — Establish repository and environment baseline | Partial | Repository inspected; QEMU selected; initial tool pins recorded; `make doctor` implemented and tested. The host check currently fails only because OpenTofu is missing. Install the pinned CLI and rerun doctor to close the prerequisite checkpoint. Full cluster compatibility remains T04. | A01 prerequisite |
-| T02 — Minimal simulated execution | Pending | Implement a minimal interface and one deterministic tool-calling execution visibly labeled SIMULATED; record run ID and expected outcome. | A04 |
+| T01 — Establish repository and environment baseline | Complete | Repository and QEMU baseline recorded; OpenTofu 1.10.6 installed with checksum/signature verification; real host `make doctor` passed with zero failures. Full cluster compatibility remains T04. | A01 prerequisite only |
+| T02 — Minimal simulated execution | Complete locally | Local interface and deterministic read-only tool execution implemented, labeled SIMULATED. Healthy and degraded scenarios expose run ID, evidence, and outcome. A04 passed through localhost HTTP with retrieval by ID. | A04, local scope |
 | T03 — Durable execution and tool contracts | Pending | Add PostgreSQL job claims/leases, bounded execution, service authentication, approval binding, and idempotency; verify recovery and rejected requests. | A05, A07, A08, A09, A10 |
 | T04 — Reproducible local platform | Pending | Ansible bootstrap, dedicated Minikube profile with Calico, OpenTofu platform ownership, and Helm application deployment. Verify readiness, a second bootstrap, and a stable post-apply plan. | A01, A02, A03 |
 | T05 — Network isolation | Pending | Default-deny policies and required flows; bounded positive and negative connectivity tests separate from authorization tests. | A06, A07 |
@@ -22,4 +22,6 @@ The ordering follows PRD section 13. Individual tasks may span multiple 60–90-
 
 The user selected QEMU for the dedicated `agentic-devops` profile. [ADR 0001](decisions/0001-qemu-lab-profile.md) records the choice, network limitations, and version-selection evidence. The existing `minikube` profile remains untouched.
 
-`make test` passes eight focused preflight tests. The real host `make doctor` exits nonzero because OpenTofu 1.10.6 is absent from PATH. Next, install and verify that CLI, rerun doctor, then continue to T02. Do not repeat the driver decision or repository setup. The checkpoint learning question is why VM isolation does not replace pod NetworkPolicies or service authorization.
+`make doctor` now passes on the host, and `make test` passes 23 tests covering preflight, execution, and HTTP contracts. `make verify-local` passes A04 within the local simulation scope. Use `make run` and the [local demonstration](LOCAL_DEMO.md) to inspect the result. [ADR 0002](decisions/0002-local-simulated-execution.md) records the synchronous in-memory boundary.
+
+Next is T03: PostgreSQL persistence, job claims/leases, service credentials/scopes, approval, and idempotency. No Minikube cluster has been created; T04 still owns cluster/bootstrap/deployment validation. The next learning discussion is why a completed diagnosis can report a degraded service, followed by the job-claim/lease design.

@@ -11,9 +11,10 @@ verify that unauthorized connections and actions are rejected.
 
 ## Current status
 
-**Early implementation: local prerequisite checks are available.** The application,
-lab cluster, infrastructure automation, dashboards, and CI workflows are still
-planned. No end-to-end acceptance scenario has passed yet.
+**T01 and T02 are complete locally:** host prerequisite checks and a working
+simulated diagnosis interface are available. A04 passes through local HTTP.
+The lab cluster, durable execution, infrastructure automation, dashboards, and
+CI workflows are still planned; Kubernetes acceptance has not run.
 
 Implemented and verified:
 
@@ -21,15 +22,37 @@ Implemented and verified:
   [config/lab.json](config/lab.json).
 - `make doctor` for host capacity, KVM access, CLI versions, existing lab profile
   settings, and the local kubectl context.
-- Eight automated tests for the prerequisite checker.
+- A localhost interface with healthy/degraded orders scenarios, a deterministic
+  read-only tool call, run IDs, tool evidence, duration, and execution results.
+- Twenty-three automated tests for preflight, execution, and HTTP behavior.
 - A scope baseline, implementation backlog, progress record, and QEMU decision.
 
-The last host check found OpenTofu missing from `PATH`. The new `agentic-devops`
-profile has not been created. Existing profiles and unrelated Kubernetes contexts
-remain untouched. See [PROGRESS.md](docs/PROGRESS.md) for the actual validation
-evidence and next task.
+The last host check passed after installing the pinned OpenTofu version. The new
+`agentic-devops` profile has not been created. Existing profiles and unrelated
+Kubernetes contexts remain untouched. See [PROGRESS.md](docs/PROGRESS.md) for the
+actual validation evidence and next task.
+
+## Try the local simulation
+
+```sh
+make run
+```
+
+Open <http://127.0.0.1:8080>, choose a scenario, and run a diagnosis. Use Ctrl+C to
+stop, or `make run PORT=8081` to use another port. The application uses Python's
+standard library, so no application packages or cluster are needed for this step.
+
+`make verify-local` automatically checks A04 and writes `artifacts/a04-local.json`.
+See the [local demonstration](docs/LOCAL_DEMO.md) for expected results and HTTP
+examples. History is held in memory for up to 100 runs and disappears on restart.
+The scripted adapter records the question but does not interpret it. It always
+calls the orders health tool; no restart or cloud/cluster action is available.
 
 ## Planned architecture
+
+The diagram below is the target M1 architecture. T02 currently implements the
+execution path as separate Python components within one local process, with an
+in-memory run store; PostgreSQL and the durable worker are T03.
 
 M1 uses deterministic responses and tool calls visibly labeled **SIMULATED**.
 It demonstrates platform operations and tool contracts; real model integration
@@ -76,8 +99,9 @@ make test
 make doctor
 ```
 
-The tests use Python's standard library; no Python dependencies need to be
-installed for this checkpoint. Exact platform CLI pins are in
+The application and tests use Python's standard library; no Python dependencies
+need to be installed for this checkpoint. HTTP tests use temporary localhost
+servers. Exact platform CLI pins are in
 [config/lab.json](config/lab.json).
 
 `make doctor` does not install tools, start a VM, change the current context, or
@@ -87,10 +111,11 @@ profile settings produce a nonzero exit. An absent lab profile is expected befor
 bootstrap. A sandbox may hide `/dev/kvm`; check host access before interpreting
 that result as a broken QEMU installation.
 
-Only `make doctor` and `make test` are implemented. Bootstrap, deployment,
-verification, UI access, and cleanup commands described in the PRD are future
-implementation contracts. A passing prerequisite check does not prove cluster
-readiness or application correctness.
+Available targets are `make doctor`, `make test`, `make run`, and `make verify-local`.
+Bootstrap, deployment, full acceptance verification, cluster port-forwards, and
+cleanup commands described in the PRD remain future implementation contracts.
+A passing prerequisite check does not prove cluster readiness; local A04 evidence
+does not prove Kubernetes integration or the remaining acceptance scenarios.
 
 ## Isolation and access design
 
@@ -130,6 +155,8 @@ question. This is a local educational lab, not a production platform.
 | [Implementation plan](docs/IMPLEMENTATION_PLAN.md) | Task backlog mapped to acceptance criteria |
 | [Progress](docs/PROGRESS.md) | Last verified checkpoint and next task |
 | [QEMU decision](docs/decisions/0001-qemu-lab-profile.md) | Driver selection, version baseline, and networking constraints |
+| [Local execution decision](docs/decisions/0002-local-simulated-execution.md) | T02 component boundaries and transition to durable execution |
+| [Local demonstration](docs/LOCAL_DEMO.md) | Run the interface and inspect expected results |
 
 ## License
 
