@@ -1,0 +1,76 @@
+---
+- name: Bootstrap only the dedicated local lab
+  hosts: lab
+  gather_facts: false
+  vars:
+    project_root: "{{ playbook_dir | dirname }}"
+    lab_config: "{{ lookup('ansible.builtin.file', project_root + '/config/lab.json') | from_json }}"
+    lab_kubeconfig: "{{ project_root }}/data/platform/kubeconfig"
+  environment:
+    KUBECONFIG: "{{ lab_kubeconfig }}"
+  tasks:
+    - name: Check the pinned host tools and existing profile configuration
+      ansible.builtin.command:
+        argv: [python3, -B, "{{ project_root }}/scripts/doctor.py"]
+      changed_when: false
+
+    - name: Create the private platform directory
+      ansible.builtin.file:
+        path: "{{ project_root }}/data/platform"
+        state: directory
+        mode: '0700'
+
+    - name: Inspect the dedicated profile status
+      ansible.builtin.command:
+        argv: [minikube, status, '-p', "{{ lab_config.profile }}", '-o', json]
+      register: profile_status
+      changed_when: false
+      failed_when: false
+
+    - name: Inspect the dedicated kubeconfig
+      ansible.builtin.stat:
+        path: "{{ lab_kubeconfig }}"
+      register: kubeconfig_stat
+
+    - name: Start the dedicated QEMU profile with Calico
+      ansible.builtin.command:
+        argv:
+          - minikube
+          - start
+          - '-p'
+          - "{{ lab_config.profile }}"
+          - "--driver={{ lab_config.driver }}"
+          - "--network={{ lab_config.network }}"
+          - "--kubernetes-version=v{{ lab_config.kubernetes }}"
+          - "--cpus={{ lab_config.cpus }}"
+          - "--memory={{ lab_config.memory_mib }}"
+          - '--container-runtime=containerd'
+          - "--cni={{ lab_config.cni }}"
+          - '--keep-context'
+          - '--embed-certs'
+          - '--wait=all'
+          - '--wait-timeout=8m'
+      when: profile_status.rc != 0 or not kubeconfig_stat.stat.exists
+      changed_when: true
+
+    - name: Restrict the generated kubeconfig permissions
+      ansible.builtin.file:
+        path: "{{ lab_kubeconfig }}"
+        mode: '0600'
+
+    - name: Wait for the dedicated Kubernetes node
+      ansible.builtin.command:
+        argv: [kubectl, '--context', "{{ lab_config.profile }}", wait, node, '--all', '--for=condition=Ready', '--timeout=300s']
+      changed_when: false
+
+    - name: Wait for Calico node networking
+      ansible.builtin.command:
+        argv: [kubectl, '--context', "{{ lab_config.profile }}", '-n', kube-system, rollout, status, daemonset/calico-node, '--timeout=300s']
+      changed_when: false
+
+    - name: Record or verify the dedicated cluster identity
+      ansible.builtin.command:
+        argv: [python3, -B, '-m', scripts.lab_platform, record-identity]
+        chdir: "{{ project_root }}"
+      register: identity_record
+      changed_when: "'CREATED' in identity_record.stdout"

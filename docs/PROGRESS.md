@@ -1,6 +1,163 @@
 # Progress
 
-## Last verified checkpoint — 2026-09-27
+## Last verified checkpoint — 2026-09-28
+
+**T04 and T05 are complete locally.** The durable application now runs as separate
+services on the dedicated QEMU profile, with persistent PostgreSQL and verified
+Calico isolation. T01–T03 remain available. The user authorized proceeding through
+T05 and committing/pushing this delivery to `origin/main`.
+
+### Delivered
+
+- Ansible bootstrap for the dedicated `agentic-devops` profile: Kubernetes
+  1.34.12, Calico 3.30.3, isolated kubeconfig, and recorded cluster identity.
+  Other profiles and the global kubectl context are preserved.
+- OpenTofu platform ownership: four namespaces with restricted pod security,
+  quotas, limits, and read-only observer RBAC; locked Kubernetes provider 2.38.0.
+- Helm Deployments for API, worker, tool gateway, and orders; PostgreSQL StatefulSet
+  with a 2 GiB persistent claim; a versioned migration Job. Images are pinned or
+  tagged from source content. Services are internal and the UI uses localhost.
+- Separate service/database credentials. The orders service owns the atomic
+  simulated effect, approval consumption, and deduplication. The gateway has
+  read-only database access and forwards using a distinct orders credential.
+- Twenty-two NetworkPolicies: default deny and DNS in all four namespaces,
+  plus seven explicit application paths with ingress and egress permission.
+- [Platform reproduction guide](PLATFORM_DEMO.md), [ADR 0004](decisions/0004-local-platform-and-network.md),
+  and updated [high-level design](HIGH_LEVEL_DESIGN.md) and SVG/PNG artwork.
+
+### Executed evidence
+
+- `make bootstrap`: all tasks passed; repeating it produced **ok=8, changed=0**.
+  The preflight accounts for RAM already allocated to a matching running VM.
+- `make verify-cluster`: **23 checks passed**, including workload/Calico readiness,
+  internal Services, authentication, all five scenarios, explicit restart approval,
+  one simulated effect, history after PostgreSQL pod replacement, and a zero-change
+  OpenTofu plan. The same checks passed with default-deny policies active.
+- `make verify-network`: **16 TCP checks passed** (allowed service paths,
+  prohibited paths, and workload internet denials). Cluster DNS resolved correctly.
+  A reachable host control verified the external destination. HTTP authorization
+  on the allowed worker/tools path returned 401/401/200/403 as expected for missing,
+  invalid, valid, and valid-but-unapproved requests. The temporary pod was removed.
+- `make verify-durable`: **23 real PostgreSQL integration tests passed** without
+  skips, including separate gateway/effect ownership, denied database writes,
+  and concurrent duplicate calls producing one effect.
+- `make test`: **27 standard-library regression/guard tests passed**; its 23
+  PostgreSQL cases are explicitly skipped and covered by `make verify-durable`.
+- Helm lint and OpenTofu formatting/validation passed. Generated architecture
+  SVG/PNG assets were inspected. Secret values, kubeconfig, state, and runtime
+  reports remain ignored local files.
+- Reproducible evidence: `artifacts/t04-cluster.json`,
+  `artifacts/t04-post-apply-plan.log`, `artifacts/t04-bootstrap-second.log`,
+  `artifacts/t05-network.json`, and `artifacts/t03-durable.json`.
+  `data/platform/build.json` records the deployed image and source revision.
+
+### Boundaries and next task
+
+The dedicated lab VM remains running. Use `make ui` for local access or
+`minikube stop -p agentic-devops` to stop its compute. Persistence was verified
+across PostgreSQL pod replacement; VM deletion recovery and high availability
+are not claimed. The restart is a simulated database effect, not a real service
+operation. No LLM or AWS calls are made.
+
+Next: **T06 — Observability and controlled failures**. Implement correlated logs,
+metrics, traces, dashboards, and scenario/reset commands. Add telemetry network
+paths together with those workloads. Distributed A05 trace evidence, CI (T07),
+and full teardown (T08) remain pending.
+
+## Previous verified checkpoint — T03, 2026-09-28
+
+Documentation follow-up: added the [high-level design](HIGH_LEVEL_DESIGN.md) with
+target application, approval, delivery, observability, and M2 model-path diagrams.
+It distinguishes the implemented T03 harness from the complete platform and
+records the remaining metrics/runbook tool and service-packaging decisions.
+This follow-up changes documentation only; T04 remains the next implementation task.
+
+Visual follow-up: added original architecture artwork in editable SVG and
+5120 × 3560 PNG under `docs/assets/`, embedded in the README and HLD. The image
+shows numbered execution steps, deployment namespaces, delivery, observability,
+and the current/future boundary. `scripts/render_architecture.py` regenerates
+the assets; SVG generation and PNG export were executed and visually inspected.
+
+**T03 is complete within its local scope.** T01/T02 remain available. The new
+PostgreSQL mode provides asynchronous runs, atomic job claims, expiring leases,
+fenced worker writes, durable step/attempt/deadline limits, HTTP service
+credentials and scopes, explicit user approval, and transactional simulated
+restart idempotency. Kubernetes and distributed observability are not validated.
+
+### Delivered
+
+- `make setup`, `make run-durable`, and `make verify-durable`, with pinned Psycopg
+  3.2.10 and a private native PostgreSQL cluster. No existing database or cluster
+  is modified. Persistent demo files live in ignored `data/t03/`.
+- SQL schema for jobs, events, approvals, tool results, and per-run simulator
+  state; separate API, worker, and tool roles with tested denied permissions.
+- HTTP 202 creation, authenticated run retrieval and approval, interface polling,
+  visible pending action, explicit approval button, and failure scenarios.
+- Default five steps, three claims, 30-second execution deadline, three-second
+  lease, 0.5-second tool timeout, two transient retries, and a separate 300-second
+  approval window. Limits are configurable through the durable launcher.
+- [ADR 0003](decisions/0003-durable-execution.md), the [durable demonstration](DURABLE_DEMO.md),
+  README updates, and the updated task backlog.
+
+### Executed evidence
+
+- `make verify-durable`: **22 real PostgreSQL integration tests passed**, with no
+  skips. Report: ignored `artifacts/t03-durable.json`. PostgreSQL 16.13, Python
+  3.13.13, Psycopg 3.2.10; source revision `4cfdf218d90c-dirty`.
+- Eight competing workers claimed one job once. A terminated claiming process
+  was recovered after lease expiry. The former lease holder could not complete
+  the recovered job, and consumed steps were preserved.
+- Eight concurrent duplicate restart calls produced one persisted effect and
+  one stored result. A worker lost after the effect but before recording its
+  response recovered without another restart. History and deduplication survived
+  a real database stop/start.
+- Reachable HTTP tool calls rejected missing/invalid credentials, missing scopes,
+  invalid arguments, missing or expired approval, changed run binding, and
+  conflicting idempotency keys. The worker could not approve through the API or
+  insert approvals using its database role. An expired run could not execute an
+  approved new effect.
+- Timeout, total deadline, claim exhaustion, approval expiry, and the durable
+  step limit reached visible terminal states. These are local A05/A07 behavioral
+  checks; A05 distributed trace evidence remains T06.
+- `make test`: **23 existing regression tests passed**. PostgreSQL integration
+  cases are explicitly skipped in this dependency-free target and are executed
+  by `make verify-durable`. `make verify-local` still passes all ten local A04 checks.
+- Chromium walkthrough: **11 checks passed**, including all five scenarios,
+  visible authentication rejection, explicit approval before a restart, one
+  simulated effect, safe text rendering, a 390px layout, visible failure reasons,
+  and history retrieval after restarting the whole demo/database. No page
+  JavaScript errors. Screenshots were inspected.
+- Browser evidence: ignored `artifacts/t03-browser.json`,
+  `artifacts/t03-approval-desktop.png`, and `artifacts/t03-mobile.png`.
+  Restart run ID: `ce7d7fec-97b7-4a8a-be58-511a1c6b8815`.
+- `node --check app/static/app.js` and `git diff --check` passed.
+- The sandbox initially denied sockets; the same HTTP/PostgreSQL checks passed
+  when run with host socket access. Test databases and demo processes were
+  stopped. No VM/profile/context was created or changed.
+
+### Boundaries and next task
+
+The local harness uses separate component threads and database credentials.
+The simulator's restart counter, approval consumption, and deduplication result
+share one database transaction. This demonstrates one **simulated database**
+effect; it is not an exactly-once guarantee for an external service. Credentials
+are generated locally and stored with restrictive permissions, not printed or
+committed. Distributed container/process packaging remains T04.
+
+Next: **T04 — Reproducible local platform**. Use the previously selected dedicated
+`agentic-devops` QEMU profile. Implement Ansible bootstrap, Calico, explicit
+OpenTofu platform ownership, and Helm application deployment. Verify readiness,
+a second bootstrap, and a stable post-apply plan. Preserve other profiles and
+contexts. A05 trace evidence and full telemetry remain T06; networking is T05.
+
+Learning question: why can a lease recover job ownership while an external
+restart still needs its own idempotency contract?
+
+This T03 delivery is present in the local working tree. No commit or push was
+performed during this task. Earlier publication notes below describe previous
+checkpoints, not the current working tree.
+
+## Previous verified checkpoint — 2026-09-27
 
 T01 is complete: OpenTofu 1.10.6 is installed and the real host `make doctor` passes with zero failures. T02 is complete within its local scope: the SIMULATED interface executes a deterministic health-tool call, exposes its evidence, and retains results by run ID in memory. All 23 tests pass; A04 passed through local HTTP, and the interface passed a Chromium walkthrough. Kubernetes and the remaining acceptance criteria are not yet validated.
 

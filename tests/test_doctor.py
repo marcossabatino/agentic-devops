@@ -63,6 +63,18 @@ class DoctorTests(unittest.TestCase):
         self.assertEqual(status, "PASS")
         self.assertIn("Stopped", message)
 
+    def test_running_matching_vm_does_not_reserve_memory_twice(self):
+        inventory = {"valid": [{"Name": "agentic-devops", "Status": "OK", "Config": {
+            "Driver": "qemu2", "Network": "builtin", "CPUs": 4, "Memory": 8192,
+            "KubernetesConfig": {"KubernetesVersion": "v1.34.12", "CNI": "calico"},
+        }}]}
+        self.assertEqual(doctor.available_memory_check(7000, self.config, json.dumps(inventory))[0], 'INFO')
+        inventory['valid'][0]['Status'] = 'Stopped'
+        self.assertEqual(doctor.available_memory_check(7000, self.config, json.dumps(inventory))[0], 'FAIL')
+        inventory['valid'][0]['Status'] = 'OK'
+        inventory['valid'][0]['Config']['Memory'] = 4096
+        self.assertEqual(doctor.available_memory_check(7000, self.config, json.dumps(inventory))[0], 'FAIL')
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -1,0 +1,6 @@
+apiVersion: v2
+name: agentic-devops
+version: 0.1.0
+appVersion: "0.4.0"
+description: Durable simulated diagnosis services for the dedicated local lab
+type: application

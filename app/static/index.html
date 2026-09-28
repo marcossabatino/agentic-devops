@@ -14,12 +14,17 @@
       <span class="badge">SIMULATED</span>
       <h1>Inspect an orders diagnosis.</h1>
       <p class="intro">Choose a scenario, run a diagnosis, and inspect the evidence behind the result.</p>
-      <p class="muted">Scripted responses and synthetic data. No LLM, cloud access, or service restarts.</p>
+      <p class="muted">Scripted responses and synthetic data. Actions affect only the local simulator.</p>
     </header>
 
     <section class="panel" aria-labelledby="new-run">
       <h2 id="new-run">New diagnosis</h2>
       <form id="run-form">
+        <div id="credentials" hidden>
+          <label for="user-token">Local lab user token</label>
+          <input id="user-token" type="password" autocomplete="off" spellcheck="false">
+          <p class="hint">Use user_token from the local settings file shown at startup. Kept only in this page.</p>
+        </div>
         <label for="scenario">Orders scenario</label>
         <select id="scenario" name="scenario">
           <option value="healthy">Healthy service</option>
@@ -27,7 +32,7 @@
         </select>
         <label for="question">Operational question</label>
         <textarea id="question" name="question" maxlength="1000" rows="3" required>Why is the orders service returning errors?</textarea>
-        <p class="hint">The question is recorded with the run. This adapter always calls the health tool; it does not interpret the text.</p>
+        <p class="hint">The question is recorded with the run. The selected scenario determines the scripted tools; the adapter does not interpret the text.</p>
         <button type="submit" id="submit">Run simulated diagnosis</button>
       </form>
       <p id="request-status" role="status" aria-live="polite"></p>
@@ -47,11 +52,16 @@
       <h3>Tool calls</h3>
       <ol id="steps"></ol>
       <p id="run-error" role="alert" hidden></p>
+      <div id="approval-panel" hidden>
+        <p>Approve one simulated restart of orders for this run. The action changes only synthetic state.</p>
+        <pre id="approval-details"></pre>
+        <button id="approve" type="button">Approve simulated restart</button>
+      </div>
       <details><summary>Full execution record</summary><pre id="raw-result"></pre></details>
     </section>
 
     <footer>
-      <p>Local learning increment · In-memory history: latest 100 runs · Restarting the app clears history.</p>
+      <p id="storage-info">Loading storage information…</p>
       <p id="build-info">Loading build information…</p>
     </footer>
   </main>

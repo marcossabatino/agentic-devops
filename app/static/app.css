@@ -12,7 +12,7 @@ h3 { font-size: 1rem; margin-top: 28px; }
 .badge { display: inline-block; color: #80edc4; background: #103529; border: 1px solid #29654e; padding: 5px 9px; border-radius: 5px; font-size: .7rem; font-weight: 700; letter-spacing: .08em; }
 .panel { border: 1px solid #2b394a; border-radius: 12px; background: #121d2a; padding: 28px; margin: 24px 0; }
 label { display: block; margin: 20px 0 9px; font-weight: 600; font-size: .875rem; }
-select, textarea { width: 100%; background: #0b121b; color: #e6edf4; border: 1px solid #435469; border-radius: 6px; padding: 12px; font: inherit; }
+select, textarea, input { width: 100%; background: #0b121b; color: #e6edf4; border: 1px solid #435469; border-radius: 6px; padding: 12px; font: inherit; }
 textarea { resize: vertical; }
 button { border: 0; border-radius: 6px; background: #80edc4; color: #0b241a; font: inherit; font-weight: 700; padding: 13px 20px; margin-top: 12px; cursor: pointer; }
 button:disabled { opacity: .65; cursor: wait; }

@@ -1,0 +1,93 @@
+{{- range $name, $component := .Values.components }}
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ $name }}
+  namespace: {{ $component.namespace }}
+automountServiceAccountToken: false
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $name }}
+  namespace: {{ $component.namespace }}
+  labels: {app.kubernetes.io/part-of: agentic-devops, app.kubernetes.io/name: {{ $name }}}
+spec:
+  replicas: 1
+  revisionHistoryLimit: 2
+  selector:
+    matchLabels: {app.kubernetes.io/name: {{ $name }}}
+  template:
+    metadata:
+      labels: {app.kubernetes.io/part-of: agentic-devops, app.kubernetes.io/name: {{ $name }}}
+      annotations:
+        lab/source-revision: {{ $.Values.sourceRevision | quote }}
+    spec:
+      serviceAccountName: {{ $name }}
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
+        seccompProfile: {type: RuntimeDefault}
+      containers:
+        - name: {{ $name }}
+          image: "{{ $.Values.image.repository }}:{{ $.Values.image.tag }}"
+          imagePullPolicy: {{ $.Values.image.pullPolicy }}
+          args: [{{ $name | quote }}]
+          ports: [{name: http, containerPort: 8080}]
+          env:
+            - {name: ALLOWED_HOSTS, value: {{ $component.allowedHosts | quote }}}
+            - {name: SOURCE_REVISION, value: {{ $.Values.sourceRevision | quote }}}
+            - {name: TOOLS_HOST, value: tools.lab-tools.svc.cluster.local}
+            - {name: ORDERS_HOST, value: orders.lab-tools.svc.cluster.local}
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: {drop: [ALL]}
+          resources:
+            requests: {cpu: 100m, memory: 64Mi}
+            limits: {cpu: 500m, memory: 256Mi}
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+              httpHeaders: [{name: Host, value: 'localhost:8080'}]
+            periodSeconds: 5
+            timeoutSeconds: 3
+          livenessProbe:
+            httpGet:
+              path: /livez
+              port: http
+              httpHeaders: [{name: Host, value: 'localhost:8080'}]
+            periodSeconds: 10
+            timeoutSeconds: 3
+          startupProbe:
+            httpGet:
+              path: /livez
+              port: http
+              httpHeaders: [{name: Host, value: 'localhost:8080'}]
+            periodSeconds: 2
+            failureThreshold: 30
+          volumeMounts:
+            - {name: credentials, mountPath: /var/run/lab, readOnly: true}
+            - {name: tmp, mountPath: /tmp}
+      volumes:
+        - name: credentials
+          secret: {secretName: '{{ $name }}-credentials', defaultMode: 0440}
+        - name: tmp
+          emptyDir: {sizeLimit: 16Mi}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $name }}
+  namespace: {{ $component.namespace }}
+  labels: {app.kubernetes.io/part-of: agentic-devops}
+spec:
+  type: ClusterIP
+  selector: {app.kubernetes.io/name: {{ $name }}}
+  ports: [{name: http, port: 8080, targetPort: http}]
+{{- end }}

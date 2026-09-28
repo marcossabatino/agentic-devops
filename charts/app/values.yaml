@@ -1,0 +1,22 @@
+image:
+  repository: agentic-devops
+  tag: local
+  pullPolicy: Never
+sourceRevision: unknown
+postgres:
+  image: "" # Required: digest-pinned image from config/images.json.
+  storage: 2Gi
+  storageClass: standard
+components:
+  api:
+    namespace: lab-app
+    allowedHosts: localhost,127.0.0.1
+  worker:
+    namespace: lab-app
+    allowedHosts: localhost,127.0.0.1
+  tools:
+    namespace: lab-tools
+    allowedHosts: localhost,127.0.0.1,tools.lab-tools.svc.cluster.local
+  orders:
+    namespace: lab-tools
+    allowedHosts: localhost,127.0.0.1,orders.lab-tools.svc.cluster.local

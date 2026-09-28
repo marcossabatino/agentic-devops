@@ -88,8 +88,23 @@ def profile_check(output, config):
         return "FAIL", "unable to parse Minikube profile inventory"
 
 
+def available_memory_check(available_mib, config, inventory):
+    """A matching running VM already owns its RAM; do not reserve it twice."""
+    try:
+        matching = profile_check(inventory, config)[0] == 'PASS'
+        running = any(item.get('Name') == config['profile'] and item.get('Status') == 'OK'
+                      for item in json.loads(inventory).get('valid', []))
+        if matching and running:
+            return 'INFO', f'available RAM: {available_mib:.0f} MiB; matching lab VM already running'
+    except (ValueError, TypeError, AttributeError):
+        pass
+    status = 'PASS' if available_mib >= config['memory_mib'] else 'FAIL'
+    return status, f'available RAM: {available_mib:.0f} MiB; VM startup requires {config["memory_mib"]}'
+
+
 def main():
     config = json.loads((ROOT / "config/lab.json").read_text())
+    inventory_code, inventory, _ = run_command(['minikube', 'profile', 'list', '-o', 'json']) if shutil.which('minikube') else (1, '', '')
     failures = 0
 
     def report(status, message):
@@ -112,8 +127,7 @@ def main():
         available_mib = int(memory["MemAvailable"]) / 1024
         require(total_gib >= config["minimum_host_memory_gib"],
                 f"host RAM: {total_gib:.1f} GiB; minimum {config['minimum_host_memory_gib']}")
-        require(available_mib >= config["memory_mib"],
-                f"available RAM: {available_mib:.0f} MiB; VM requires {config['memory_mib']}")
+        report(*available_memory_check(available_mib, config, inventory))
     except (OSError, KeyError, ValueError):
         report("FAIL", "cannot inspect host memory")
     free_gib = shutil.disk_usage(Path.home()).free / 1024**3
@@ -127,12 +141,11 @@ def main():
         for tool, expected in config["tools"].items():
             report(*tool_check(tool, expected, env))
     if shutil.which("minikube"):
-        code, output, _ = run_command(["minikube", "profile", "list", "-o", "json"])
         # Minikube also returns a nonzero exit code for an empty profile inventory.
-        if output.strip():
-            report(*profile_check(output, config))
+        if inventory.strip():
+            report(*profile_check(inventory, config))
         else:
-            report("FAIL", f"cannot inspect Minikube profiles (exit {code})")
+            report("FAIL", f"cannot inspect Minikube profiles (exit {inventory_code})")
     if shutil.which("kubectl"):
         code, context, _ = run_command(["kubectl", "config", "current-context"])
         if not code and context.strip() == config["profile"]:

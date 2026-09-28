@@ -1,0 +1,246 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2560" height="1780" viewBox="0 0 2560 1780" role="img" aria-labelledby="title desc">
+<title id="title">Agentic DevOps — target architecture and execution workflow</title>
+<desc id="desc">A local operator submits a diagnosis to the API. PostgreSQL holds jobs and history. A leased worker uses a simulated model adapter and authenticated tools to inspect an orders simulator. Restarts require approval and deduplication. The target includes Kubernetes, observability, infrastructure automation and CI. Bedrock is a future M2 integration. T05 runs separate Kubernetes services with network isolation; observability and AWS remain planned.</desc>
+<defs><marker id="arrow-teal" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0 10 5 0 10Z" fill="#007E78"/></marker><marker id="arrow-muted" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0 10 5 0 10Z" fill="#8796A5"/></marker></defs>
+<rect x="0" y="0" width="2560" height="1780" rx="0" fill="#FFFFFF"/>
+<rect x="0" y="0" width="16" height="1780" rx="0" fill="#007E78"/>
+<text x="80" y="69" font-family="Open Sans, Arial, sans-serif" font-size="21" font-weight="700" fill="#007E78" text-anchor="start" letter-spacing="3">AGENTIC DEVOPS PLATFORM LAB</text>
+<text x="80" y="142" font-family="Montserrat, Arial, sans-serif" font-size="53" font-weight="700" fill="#172B42" text-anchor="start">From a question to an auditable action.</text>
+<text x="80" y="191" font-family="Open Sans, Arial, sans-serif" font-size="25" font-weight="400" fill="#5C6D80" text-anchor="start">Diagnose a simulated service. Approve controlled actions. Investigate every execution.</text>
+<rect x="2080" y="53" width="400" height="47" rx="23" fill="#172B42"/>
+<text x="2280" y="84" font-family="Open Sans, Arial, sans-serif" font-size="17" font-weight="700" fill="white" text-anchor="middle" letter-spacing="1">M1  /  TARGET ARCHITECTURE</text>
+<path d="M2090 141 H2134" fill="none" stroke="#007E78" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-teal)"/>
+<text x="2148" y="148" font-family="Open Sans, Arial, sans-serif" font-size="18" font-weight="400" fill="#5C6D80" text-anchor="start">Execution flow</text>
+<path d="M2310 141 H2354" fill="none" stroke="#7754B5" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="7 6"/>
+<text x="2370" y="148" font-family="Open Sans, Arial, sans-serif" font-size="18" font-weight="400" fill="#5C6D80" text-anchor="start">Future</text>
+<text x="2080" y="190" font-family="Open Sans, Arial, sans-serif" font-size="17" font-weight="400" fill="#5C6D80" text-anchor="start">Current implementation: T05 Kubernetes lab</text>
+<rect x="80" y="245" width="1930" height="1070" rx="22" fill="#F7F9FC" stroke="#CED9E3" stroke-width="2"/>
+<text x="110" y="286" font-family="Open Sans, Arial, sans-serif" font-size="17" font-weight="700" fill="#5C6D80" text-anchor="start" letter-spacing="2">LOCAL MACHINE</text>
+<rect x="370" y="310" width="1608" height="969" rx="16" fill="#FFFFFF" stroke="#AEBFCF" stroke-width="2"/>
+<g transform="translate(394 329) scale(0.8)" fill="none" stroke="#3269B4" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+<path d="m24 3 19 11v22L24 47 5 36V14Z"/><circle cx="24" cy="25" r="7"/><path d="M24 8v10m0 14v10M10 17l8 5m12 7 8 5M10 34l8-5m12-7 8-5"/>
+</g>
+<text x="448" y="359" font-family="Open Sans, Arial, sans-serif" font-size="24" font-weight="700" fill="#172B42" text-anchor="start">Dedicated Minikube VM</text>
+<text x="1945" y="356" font-family="Open Sans, Arial, sans-serif" font-size="19" font-weight="400" fill="#5C6D80" text-anchor="end">agentic-devops  /  QEMU + Calico</text>
+<rect x="398" y="391" width="903" height="402" rx="12" fill="#F2F8F8" stroke="#BBD9D6" stroke-width="2"/>
+<text x="420" y="423" font-family="Open Sans, Arial, sans-serif" font-size="17" font-weight="700" fill="#007E78" text-anchor="start">lab-app</text>
+<rect x="1345" y="391" width="604" height="402" rx="12" fill="#F4F7FC" stroke="#C4D2E8" stroke-width="2"/>
+<text x="1367" y="423" font-family="Open Sans, Arial, sans-serif" font-size="17" font-weight="700" fill="#3269B4" text-anchor="start">lab-tools</text>
+<rect x="759" y="922" width="542" height="157" rx="12" fill="#F5F3FB" stroke="#D5C9E7" stroke-width="2"/>
+<text x="781" y="951" font-family="Open Sans, Arial, sans-serif" font-size="17" font-weight="700" fill="#7754B5" text-anchor="start">lab-data</text>
+<g transform="translate(160 508) scale(1.4)" fill="none" stroke="#172B42" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+<circle cx="24" cy="13" r="9"/><path d="M7 43c0-12 7-18 17-18s17 6 17 18Z"/>
+</g>
+<text x="194" y="613" font-family="Open Sans, Arial, sans-serif" font-size="25" font-weight="700" fill="#172B42" text-anchor="middle">Lab operator</text>
+<text x="194" y="645" font-family="Open Sans, Arial, sans-serif" font-size="19" font-weight="400" fill="#5C6D80" text-anchor="middle">Local browser</text>
+<text x="194" y="709" font-family="Open Sans, Arial, sans-serif" font-size="18" font-weight="400" fill="#5C6D80" text-anchor="middle">Request a diagnosis</text>
+<text x="194" y="738" font-family="Open Sans, Arial, sans-serif" font-size="18" font-weight="400" fill="#5C6D80" text-anchor="middle">Review evidence</text>
+<text x="194" y="767" font-family="Open Sans, Arial, sans-serif" font-size="18" font-weight="400" fill="#5C6D80" text-anchor="middle">Approve an action</text>
+<rect x="445" y="565" width="280" height="168" rx="14" fill="white" stroke="#CED9E3" stroke-width="2"/>
+<rect x="465" y="585" width="60" height="60" rx="12" fill="#EFF6F6"/>
+<g transform="translate(475 595) scale(0.83)" fill="none" stroke="#007E78" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+<rect x="3" y="6" width="42" height="35" rx="5"/><path d="M3 16h42M10 11h1m5 0h1m5 0h1M20 24l-6 5 6 5m9-10 6 5-6 5"/>
+</g>
+<text x="465" y="679" font-family="Open Sans, Arial, sans-serif" font-size="25" font-weight="700" fill="#172B42" text-anchor="start">Interface / API</text>
+<text x="465" y="710" font-family="Open Sans, Arial, sans-serif" font-size="17" font-weight="400" fill="#5C6D80" text-anchor="start">Submit, poll and approve</text>
+<rect x="990" y="565" width="280" height="168" rx="14" fill="white" stroke="#CED9E3" stroke-width="2"/>
+<rect x="1010" y="585" width="60" height="60" rx="12" fill="#EFF6F6"/>
+<g transform="translate(1020 595) scale(0.83)" fill="none" stroke="#007E78" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+<rect x="10" y="10" width="28" height="28" rx="5"/><path d="M18 0v10M30 0v10M18 38v10M30 38v10M0 18h10M0 30h10M38 18h10M38 30h10M20 18l10 6-10 6Z"/>
+</g>
+<text x="1010" y="679" font-family="Open Sans, Arial, sans-serif" font-size="25" font-weight="700" fill="#172B42" text-anchor="start">Agent worker</text>
+<text x="1010" y="710" font-family="Open Sans, Arial, sans-serif" font-size="17" font-weight="400" fill="#5C6D80" text-anchor="start">Lease, execute and persist</text>
+<rect x="1380" y="565" width="240" height="168" rx="14" fill="white" stroke="#CED9E3" stroke-width="2"/>
+<rect x="1400" y="585" width="60" height="60" rx="12" fill="#F0ECF8"/>
+<g transform="translate(1410 595) scale(0.83)" fill="none" stroke="#3269B4" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+<path d="M24 3 42 10v13c0 11-9 19-18 23C15 42 6 34 6 23V10ZM15 24l6 6 13-14"/>
+</g>
+<text x="1400" y="679" font-family="Open Sans, Arial, sans-serif" font-size="25" font-weight="700" fill="#172B42" text-anchor="start">Tool service</text>
+<text x="1400" y="710" font-family="Open Sans, Arial, sans-serif" font-size="17" font-weight="400" fill="#5C6D80" text-anchor="start">Authorize every call</text>
+<rect x="1680" y="565" width="240" height="168" rx="14" fill="white" stroke="#CED9E3" stroke-width="2"/>
+<rect x="1700" y="585" width="60" height="60" rx="12" fill="#F0ECF8"/>
+<g transform="translate(1710 595) scale(0.83)" fill="none" stroke="#3269B4" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+<rect x="6" y="4" width="36" height="40" rx="5"/><path d="M6 17h36M6 31h36M12 10h4m-4 14h4m-4 14h4M28 10h8m-8 14h8m-8 14h8"/>
+</g>
+<text x="1700" y="679" font-family="Open Sans, Arial, sans-serif" font-size="25" font-weight="700" fill="#172B42" text-anchor="start">Orders simulator</text>
+<text x="1700" y="710" font-family="Open Sans, Arial, sans-serif" font-size="17" font-weight="400" fill="#5C6D80" text-anchor="start">Health and restart</text>
+<rect x="990" y="425" width="280" height="85" rx="12" fill="#FFFFFF" stroke="#BBD9D6" stroke-width="2"/>
+<g transform="translate(1008 443) scale(0.85)" fill="none" stroke="#007E78" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+<path d="M24 4 43 15v20L24 46 5 35V15ZM5 15l19 11 19-11M24 26v20M14 10l19 11"/>
+</g>
+<text x="1065" y="460" font-family="Open Sans, Arial, sans-serif" font-size="21" font-weight="700" fill="#172B42" text-anchor="start">Model adapter</text>
+<text x="1065" y="489" font-family="Open Sans, Arial, sans-serif" font-size="16" font-weight="400" fill="#5C6D80" text-anchor="start">M1: scripted decisions</text>
+<path d="M278 599 H445" fill="none" stroke="#007E78" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-teal)"/>
+<circle cx="360" cy="599" r="19" fill="#007E78" stroke="white" stroke-width="4"/>
+<text x="360" y="605" font-family="Open Sans, Arial, sans-serif" font-size="19" font-weight="700" fill="white" text-anchor="middle">1</text>
+<text x="360" y="557" font-family="Open Sans, Arial, sans-serif" font-size="17" font-weight="400" fill="#5C6D80" text-anchor="middle">localhost</text>
+<path d="M445 670 H278" fill="none" stroke="#007E78" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-teal)"/>
+<circle cx="360" cy="670" r="19" fill="#007E78" stroke="white" stroke-width="4"/>
+<text x="360" y="676" font-family="Open Sans, Arial, sans-serif" font-size="19" font-weight="700" fill="white" text-anchor="middle">8</text>
+<text x="360" y="711" font-family="Open Sans, Arial, sans-serif" font-size="17" font-weight="400" fill="#5C6D80" text-anchor="middle">result</text>
+<path d="M585 733 V1009 H788" fill="none" stroke="#007E78" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-teal)"/>
+<circle cx="585" cy="836" r="19" fill="#007E78" stroke="white" stroke-width="4"/>
+<text x="585" y="842" font-family="Open Sans, Arial, sans-serif" font-size="19" font-weight="700" fill="white" text-anchor="middle">2</text>
+<text x="563" y="881" font-family="Open Sans, Arial, sans-serif" font-size="18" font-weight="400" fill="#5C6D80" text-anchor="end">Publish job</text>
+<text x="563" y="908" font-family="Open Sans, Arial, sans-serif" font-size="18" font-weight="400" fill="#5C6D80" text-anchor="end">Read history</text>
+<path d="M1130 733 V966" fill="none" stroke="#007E78" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-teal)"/>
+<circle cx="1130" cy="838" r="19" fill="#007E78" stroke="white" stroke-width="4"/>
+<text x="1130" y="844" font-family="Open Sans, Arial, sans-serif" font-size="19" font-weight="700" fill="white" text-anchor="middle">3</text>
+<text x="1160" y="844" font-family="Open Sans, Arial, sans-serif" font-size="18" font-weight="400" fill="#5C6D80" text-anchor="start">Claim</text>
+<circle cx="1130" cy="890" r="19" fill="#007E78" stroke="white" stroke-width="4"/>
+<text x="1130" y="896" font-family="Open Sans, Arial, sans-serif" font-size="19" font-weight="700" fill="white" text-anchor="middle">7</text>
+<text x="1160" y="896" font-family="Open Sans, Arial, sans-serif" font-size="18" font-weight="400" fill="#5C6D80" text-anchor="start">Save evidence</text>
+<path d="M1130 565 V510" fill="none" stroke="#007E78" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-teal)"/>
+<circle cx="1130" cy="539" r="19" fill="#007E78" stroke="white" stroke-width="4"/>
+<text x="1130" y="545" font-family="Open Sans, Arial, sans-serif" font-size="19" font-weight="700" fill="white" text-anchor="middle">4</text>
+<path d="M1270 635 H1380" fill="none" stroke="#007E78" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-teal)"/>
+<circle cx="1325" cy="635" r="19" fill="#007E78" stroke="white" stroke-width="4"/>
+<text x="1325" y="641" font-family="Open Sans, Arial, sans-serif" font-size="19" font-weight="700" fill="white" text-anchor="middle">5</text>
+<path d="M1620 635 H1680" fill="none" stroke="#007E78" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-teal)"/>
+<circle cx="1650" cy="635" r="19" fill="#007E78" stroke="white" stroke-width="4"/>
+<text x="1650" y="641" font-family="Open Sans, Arial, sans-serif" font-size="19" font-weight="700" fill="white" text-anchor="middle">6</text>
+<path d="M1500 733 V1009 H1270" fill="none" stroke="#007E78" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-teal)"/>
+<text x="1530" y="843" font-family="Open Sans, Arial, sans-serif" font-size="19" font-weight="600" fill="#3269B4" text-anchor="start">Approval binding</text>
+<text x="1530" y="873" font-family="Open Sans, Arial, sans-serif" font-size="19" font-weight="600" fill="#3269B4" text-anchor="start">+ idempotency</text>
+<text x="1530" y="904" font-family="Open Sans, Arial, sans-serif" font-size="16" font-weight="400" fill="#5C6D80" text-anchor="start">Checked before a new effect</text>
+<path d="M1800 733 V1067 H1316 V1037 H1270" fill="none" stroke="#007E78" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-teal)"/>
+<text x="1770" y="1038" font-family="Open Sans, Arial, sans-serif" font-size="16" font-weight="400" fill="#5C6D80" text-anchor="end">Atomic effect + result</text>
+<rect x="789" y="966" width="482" height="90" rx="10" fill="#FFFFFF" stroke="#D5C9E7" stroke-width="2"/>
+<g transform="translate(807 985) scale(0.9)" fill="none" stroke="#7754B5" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+<ellipse cx="24" cy="9" rx="19" ry="7"/><path d="M5 9v29c0 10 38 10 38 0V9M5 23c0 10 38 10 38 0"/>
+</g>
+<text x="871" y="1001" font-family="Open Sans, Arial, sans-serif" font-size="26" font-weight="700" fill="#172B42" text-anchor="start">PostgreSQL</text>
+<text x="871" y="1032" font-family="Open Sans, Arial, sans-serif" font-size="17" font-weight="400" fill="#5C6D80" text-anchor="start">Jobs · events · approvals · tool results</text>
+<rect x="760" y="587" width="190" height="140" rx="12" fill="#FFFFFF" stroke="#BBD9D6" stroke-width="2"/>
+<text x="855" y="620" font-family="Open Sans, Arial, sans-serif" font-size="14" font-weight="700" fill="#007E78" text-anchor="middle" letter-spacing="1">HUMAN GATE</text>
+<text x="855" y="656" font-family="Open Sans, Arial, sans-serif" font-size="17" font-weight="400" fill="#172B42" text-anchor="middle">Restart requires</text>
+<text x="855" y="684" font-family="Open Sans, Arial, sans-serif" font-size="17" font-weight="400" fill="#172B42" text-anchor="middle">explicit approval</text>
+<path d="M725 702 H760" fill="none" stroke="#8796A5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="4 5"/>
+<rect x="398" y="1117" width="1551" height="135" rx="12" fill="#F7F9FC" stroke="#CED9E3" stroke-width="2"/>
+<text x="420" y="1146" font-family="Open Sans, Arial, sans-serif" font-size="17" font-weight="700" fill="#5C6D80" text-anchor="start">lab-observability</text>
+<text x="1925" y="1146" font-family="Open Sans, Arial, sans-serif" font-size="17" font-weight="400" fill="#5C6D80" text-anchor="end">Telemetry across API, worker, tools and simulator</text>
+<g transform="translate(425 1176) scale(0.9)" fill="none" stroke="#5C6D80" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+<path d="M5 9h27M13 21h30M13 9v12m8 0v15m0 0h17M5 43h16"/><circle cx="35" cy="9" r="3"/><circle cx="41" cy="36" r="3"/>
+</g>
+<text x="487" y="1197" font-family="Open Sans, Arial, sans-serif" font-size="21" font-weight="700" fill="#172B42" text-anchor="start">Traces</text>
+<text x="487" y="1224" font-family="Open Sans, Arial, sans-serif" font-size="16" font-weight="400" fill="#5C6D80" text-anchor="start">OTel Collector → Tempo</text>
+<g transform="translate(820 1176) scale(0.9)" fill="none" stroke="#5C6D80" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+<path d="M5 5v38h39M13 35V25m10 10V15m10 20V8M10 16l10-7 10 3 13-9"/>
+</g>
+<text x="882" y="1197" font-family="Open Sans, Arial, sans-serif" font-size="21" font-weight="700" fill="#172B42" text-anchor="start">Metrics</text>
+<text x="882" y="1224" font-family="Open Sans, Arial, sans-serif" font-size="16" font-weight="400" fill="#5C6D80" text-anchor="start">Prometheus</text>
+<g transform="translate(1190 1176) scale(0.9)" fill="none" stroke="#5C6D80" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+<rect x="4" y="5" width="40" height="38" rx="4"/><path d="M4 17h40M19 17v26M10 11h1m5 0h1M26 35l5-7 5 3 4-8"/>
+</g>
+<text x="1252" y="1197" font-family="Open Sans, Arial, sans-serif" font-size="21" font-weight="700" fill="#172B42" text-anchor="start">Explore</text>
+<text x="1252" y="1224" font-family="Open Sans, Arial, sans-serif" font-size="16" font-weight="400" fill="#5C6D80" text-anchor="start">Grafana dashboards</text>
+<g transform="translate(1590 1176) scale(0.9)" fill="none" stroke="#5C6D80" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+<path d="M12 4h24l7 7v33H5V4h7M34 4v10h9M13 23h22M13 31h22M13 38h14"/>
+</g>
+<text x="1652" y="1197" font-family="Open Sans, Arial, sans-serif" font-size="21" font-weight="700" fill="#172B42" text-anchor="start">Logs</text>
+<text x="1652" y="1224" font-family="Open Sans, Arial, sans-serif" font-size="16" font-weight="400" fill="#5C6D80" text-anchor="start">JSON · run_id · trace_id</text>
+<rect x="2040" y="245" width="440" height="660" rx="18" fill="#FFFFFF" stroke="#CED9E3" stroke-width="2"/>
+<text x="2070" y="291" font-family="Open Sans, Arial, sans-serif" font-size="18" font-weight="700" fill="#172B42" text-anchor="start" letter-spacing="1">HOW TO READ THE FLOW</text>
+<text x="2070" y="325" font-family="Open Sans, Arial, sans-serif" font-size="18" font-weight="400" fill="#5C6D80" text-anchor="start">One run, from request to result</text>
+<circle cx="2089" cy="375" r="19" fill="#007E78" stroke="white" stroke-width="4"/>
+<text x="2089" y="381" font-family="Open Sans, Arial, sans-serif" font-size="19" font-weight="700" fill="white" text-anchor="middle">1</text>
+<text x="2124" y="371" font-family="Open Sans, Arial, sans-serif" font-size="21" font-weight="700" fill="#172B42" text-anchor="start">Request</text>
+<text x="2124" y="396" font-family="Open Sans, Arial, sans-serif" font-size="16" font-weight="400" fill="#5C6D80" text-anchor="start">Choose a scenario and ask.</text>
+<circle cx="2089" cy="438" r="19" fill="#007E78" stroke="white" stroke-width="4"/>
+<text x="2089" y="444" font-family="Open Sans, Arial, sans-serif" font-size="19" font-weight="700" fill="white" text-anchor="middle">2</text>
+<text x="2124" y="434" font-family="Open Sans, Arial, sans-serif" font-size="21" font-weight="700" fill="#172B42" text-anchor="start">Publish</text>
+<text x="2124" y="459" font-family="Open Sans, Arial, sans-serif" font-size="16" font-weight="400" fill="#5C6D80" text-anchor="start">Persist a job and return its ID.</text>
+<circle cx="2089" cy="501" r="19" fill="#007E78" stroke="white" stroke-width="4"/>
+<text x="2089" y="507" font-family="Open Sans, Arial, sans-serif" font-size="19" font-weight="700" fill="white" text-anchor="middle">3</text>
+<text x="2124" y="497" font-family="Open Sans, Arial, sans-serif" font-size="21" font-weight="700" fill="#172B42" text-anchor="start">Claim</text>
+<text x="2124" y="522" font-family="Open Sans, Arial, sans-serif" font-size="16" font-weight="400" fill="#5C6D80" text-anchor="start">A worker acquires a timed lease.</text>
+<circle cx="2089" cy="564" r="19" fill="#007E78" stroke="white" stroke-width="4"/>
+<text x="2089" y="570" font-family="Open Sans, Arial, sans-serif" font-size="19" font-weight="700" fill="white" text-anchor="middle">4</text>
+<text x="2124" y="560" font-family="Open Sans, Arial, sans-serif" font-size="21" font-weight="700" fill="#172B42" text-anchor="start">Decide</text>
+<text x="2124" y="585" font-family="Open Sans, Arial, sans-serif" font-size="16" font-weight="400" fill="#5C6D80" text-anchor="start">The adapter proposes a step.</text>
+<circle cx="2089" cy="627" r="19" fill="#007E78" stroke="white" stroke-width="4"/>
+<text x="2089" y="633" font-family="Open Sans, Arial, sans-serif" font-size="19" font-weight="700" fill="white" text-anchor="middle">5</text>
+<text x="2124" y="623" font-family="Open Sans, Arial, sans-serif" font-size="21" font-weight="700" fill="#172B42" text-anchor="start">Authorize</text>
+<text x="2124" y="648" font-family="Open Sans, Arial, sans-serif" font-size="16" font-weight="400" fill="#5C6D80" text-anchor="start">Tools validate identity and scope.</text>
+<circle cx="2089" cy="690" r="19" fill="#007E78" stroke="white" stroke-width="4"/>
+<text x="2089" y="696" font-family="Open Sans, Arial, sans-serif" font-size="19" font-weight="700" fill="white" text-anchor="middle">6</text>
+<text x="2124" y="686" font-family="Open Sans, Arial, sans-serif" font-size="21" font-weight="700" fill="#172B42" text-anchor="start">Inspect / act</text>
+<text x="2124" y="711" font-family="Open Sans, Arial, sans-serif" font-size="16" font-weight="400" fill="#5C6D80" text-anchor="start">Read health or approved restart.</text>
+<circle cx="2089" cy="753" r="19" fill="#007E78" stroke="white" stroke-width="4"/>
+<text x="2089" y="759" font-family="Open Sans, Arial, sans-serif" font-size="19" font-weight="700" fill="white" text-anchor="middle">7</text>
+<text x="2124" y="749" font-family="Open Sans, Arial, sans-serif" font-size="21" font-weight="700" fill="#172B42" text-anchor="start">Record</text>
+<text x="2124" y="774" font-family="Open Sans, Arial, sans-serif" font-size="16" font-weight="400" fill="#5C6D80" text-anchor="start">Store evidence and the outcome.</text>
+<circle cx="2089" cy="816" r="19" fill="#007E78" stroke="white" stroke-width="4"/>
+<text x="2089" y="822" font-family="Open Sans, Arial, sans-serif" font-size="19" font-weight="700" fill="white" text-anchor="middle">8</text>
+<text x="2124" y="812" font-family="Open Sans, Arial, sans-serif" font-size="21" font-weight="700" fill="#172B42" text-anchor="start">Review</text>
+<text x="2124" y="837" font-family="Open Sans, Arial, sans-serif" font-size="16" font-weight="400" fill="#5C6D80" text-anchor="start">Poll the run and inspect results.</text>
+<rect x="2040" y="932" width="440" height="383" rx="18" fill="#F8F5FD" stroke="#BAA4D9" stroke-width="2" stroke-dasharray="8 7"/>
+<text x="2070" y="975" font-family="Open Sans, Arial, sans-serif" font-size="17" font-weight="700" fill="#7754B5" text-anchor="start" letter-spacing="1">M2  /  FUTURE EXTENSION</text>
+<g transform="translate(2072 1000) scale(1.05)" fill="none" stroke="#7754B5" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+<path d="M12 36a10 10 0 0 1-1-20 14 14 0 0 1 27 1 10 10 0 0 1 0 19ZM19 20l-5 6 5 6m10-12 5 6-5 6"/>
+</g>
+<text x="2139" y="1033" font-family="Open Sans, Arial, sans-serif" font-size="26" font-weight="700" fill="#172B42" text-anchor="start">Amazon Bedrock</text>
+<text x="2070" y="1085" font-family="Open Sans, Arial, sans-serif" font-size="20" font-weight="400" fill="#172B42" text-anchor="start">Real model inference replaces</text>
+<text x="2070" y="1115" font-family="Open Sans, Arial, sans-serif" font-size="20" font-weight="400" fill="#172B42" text-anchor="start">the scripted model behavior.</text>
+<text x="2070" y="1170" font-family="Open Sans, Arial, sans-serif" font-size="17" font-weight="400" fill="#5C6D80" text-anchor="start">Restricted temporary credentials</text>
+<text x="2070" y="1200" font-family="Open Sans, Arial, sans-serif" font-size="17" font-weight="400" fill="#5C6D80" text-anchor="start">Controlled egress and usage limits</text>
+<text x="2070" y="1230" font-family="Open Sans, Arial, sans-serif" font-size="17" font-weight="400" fill="#5C6D80" text-anchor="start">Existing approval rules still apply</text>
+<text x="2070" y="1280" font-family="Open Sans, Arial, sans-serif" font-size="16" font-weight="600" fill="#7754B5" text-anchor="start">AWS is not used by the current lab.</text>
+<rect x="80" y="1345" width="2400" height="233" rx="18" fill="#F5F7FA" stroke="#CED9E3" stroke-width="2"/>
+<text x="110" y="1386" font-family="Open Sans, Arial, sans-serif" font-size="18" font-weight="700" fill="#172B42" text-anchor="start" letter-spacing="1.5">BUILD &amp; DELIVERY</text>
+<text x="2450" y="1386" font-family="Open Sans, Arial, sans-serif" font-size="20" font-weight="400" fill="#5C6D80" text-anchor="end">Prepare once · deploy a validated revision · run many diagnoses</text>
+<g transform="translate(110 1420) scale(0.9)" fill="none" stroke="#3269B4" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+<circle cx="12" cy="9" r="5"/><circle cx="12" cy="39" r="5"/><circle cx="36" cy="12" r="5"/><path d="M12 14v20m24-17v4c0 9-24 1-24 12"/>
+</g>
+<text x="172" y="1432" font-family="Open Sans, Arial, sans-serif" font-size="12" font-weight="700" fill="#5C6D80" text-anchor="start" letter-spacing="1">CI</text>
+<text x="172" y="1463" font-family="Open Sans, Arial, sans-serif" font-size="23" font-weight="700" fill="#172B42" text-anchor="start">GitHub Actions</text>
+<text x="110" y="1510" font-family="Open Sans, Arial, sans-serif" font-size="17" font-weight="400" fill="#5C6D80" text-anchor="start">Validate and build</text>
+<path d="M445 1451 H485" fill="none" stroke="#8796A5" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-muted)"/>
+<g transform="translate(507 1420) scale(0.9)" fill="none" stroke="#3269B4" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+<rect x="3" y="7" width="42" height="34" rx="5"/><path d="m12 18 7 6-7 6m15 0h10"/>
+</g>
+<text x="569" y="1432" font-family="Open Sans, Arial, sans-serif" font-size="12" font-weight="700" fill="#5C6D80" text-anchor="start" letter-spacing="1">DEPLOYMENT</text>
+<text x="569" y="1463" font-family="Open Sans, Arial, sans-serif" font-size="23" font-weight="700" fill="#172B42" text-anchor="start">Local operator</text>
+<text x="507" y="1510" font-family="Open Sans, Arial, sans-serif" font-size="17" font-weight="400" fill="#5C6D80" text-anchor="start">Select the validated revision</text>
+<path d="M842 1451 H882" fill="none" stroke="#8796A5" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-muted)"/>
+<g transform="translate(904 1420) scale(0.9)" fill="none" stroke="#3269B4" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+<rect x="3" y="7" width="42" height="34" rx="5"/><path d="m12 18 7 6-7 6m15 0h10"/>
+</g>
+<text x="966" y="1432" font-family="Open Sans, Arial, sans-serif" font-size="12" font-weight="700" fill="#5C6D80" text-anchor="start" letter-spacing="1">BOOTSTRAP</text>
+<text x="966" y="1463" font-family="Open Sans, Arial, sans-serif" font-size="23" font-weight="700" fill="#172B42" text-anchor="start">Ansible</text>
+<text x="904" y="1510" font-family="Open Sans, Arial, sans-serif" font-size="17" font-weight="400" fill="#5C6D80" text-anchor="start">Prepare host and cluster</text>
+<path d="M1239 1451 H1279" fill="none" stroke="#8796A5" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-muted)"/>
+<g transform="translate(1301 1420) scale(0.9)" fill="none" stroke="#3269B4" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+<path d="m24 4 21 11-21 11L3 15ZM3 25l21 11 21-11M3 35l21 11 21-11"/>
+</g>
+<text x="1363" y="1432" font-family="Open Sans, Arial, sans-serif" font-size="12" font-weight="700" fill="#5C6D80" text-anchor="start" letter-spacing="1">INFRASTRUCTURE</text>
+<text x="1363" y="1463" font-family="Open Sans, Arial, sans-serif" font-size="23" font-weight="700" fill="#172B42" text-anchor="start">OpenTofu</text>
+<text x="1301" y="1510" font-family="Open Sans, Arial, sans-serif" font-size="17" font-weight="400" fill="#5C6D80" text-anchor="start">Platform, policies, telemetry</text>
+<path d="M1636 1451 H1676" fill="none" stroke="#8796A5" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-muted)"/>
+<g transform="translate(1698 1420) scale(0.9)" fill="none" stroke="#3269B4" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+<circle cx="24" cy="24" r="14"/><circle cx="24" cy="24" r="4"/><path d="M24 1v19m0 8v19M1 24h19m8 0h19M8 8l13 13m6 6 13 13M8 40l13-13m6-6L40 8"/>
+</g>
+<text x="1760" y="1432" font-family="Open Sans, Arial, sans-serif" font-size="12" font-weight="700" fill="#5C6D80" text-anchor="start" letter-spacing="1">APPLICATION</text>
+<text x="1760" y="1463" font-family="Open Sans, Arial, sans-serif" font-size="23" font-weight="700" fill="#172B42" text-anchor="start">Helm</text>
+<text x="1698" y="1510" font-family="Open Sans, Arial, sans-serif" font-size="17" font-weight="400" fill="#5C6D80" text-anchor="start">Deploy application resources</text>
+<path d="M2033 1451 H2073" fill="none" stroke="#8796A5" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-muted)"/>
+<g transform="translate(2095 1420) scale(0.9)" fill="none" stroke="#3269B4" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+<path d="m24 3 19 11v22L24 47 5 36V14Z"/><circle cx="24" cy="25" r="7"/><path d="M24 8v10m0 14v10M10 17l8 5m12 7 8 5M10 34l8-5m12-7 8-5"/>
+</g>
+<text x="2157" y="1432" font-family="Open Sans, Arial, sans-serif" font-size="12" font-weight="700" fill="#5C6D80" text-anchor="start" letter-spacing="1">VERIFICATION</text>
+<text x="2157" y="1463" font-family="Open Sans, Arial, sans-serif" font-size="23" font-weight="700" fill="#172B42" text-anchor="start">Local lab</text>
+<text x="2095" y="1510" font-family="Open Sans, Arial, sans-serif" font-size="17" font-weight="400" fill="#5C6D80" text-anchor="start">Verify scenarios and isolation</text>
+<text x="110" y="1550" font-family="Open Sans, Arial, sans-serif" font-size="18" font-weight="400" fill="#5C6D80" text-anchor="start">NetworkPolicy: deny by default, allow required paths. Application authorization remains a separate control.</text>
+<text x="80" y="1632" font-family="Open Sans, Arial, sans-serif" font-size="17" font-weight="700" fill="#5C6D80" text-anchor="start" letter-spacing="1.5">IMPLEMENTATION BOUNDARY</text>
+<rect x="80" y="1652" width="725" height="66" rx="10" fill="#EEF7F3"/>
+<text x="100" y="1678" font-family="Open Sans, Arial, sans-serif" font-size="15" font-weight="700" fill="#007E78" text-anchor="start">BUILT LOCALLY  /  T01–T05</text>
+<text x="100" y="1704" font-family="Open Sans, Arial, sans-serif" font-size="17" font-weight="400" fill="#172B42" text-anchor="start">Durable runs · Kubernetes · approval · network isolation</text>
+<rect x="825" y="1652" width="905" height="66" rx="10" fill="#F2F5FA"/>
+<text x="845" y="1678" font-family="Open Sans, Arial, sans-serif" font-size="15" font-weight="700" fill="#3269B4" text-anchor="start">PLANNED  /  T06–T08</text>
+<text x="845" y="1704" font-family="Open Sans, Arial, sans-serif" font-size="17" font-weight="400" fill="#172B42" text-anchor="start">Correlated telemetry · dashboards · CI · full verification · scoped cleanup</text>
+<rect x="1750" y="1652" width="730" height="66" rx="10" fill="#FBF4E9"/>
+<text x="1770" y="1678" font-family="Open Sans, Arial, sans-serif" font-size="15" font-weight="700" fill="#B96914" text-anchor="start">CURRENT EFFECT BOUNDARY</text>
+<text x="1770" y="1704" font-family="Open Sans, Arial, sans-serif" font-size="17" font-weight="400" fill="#172B42" text-anchor="start">Orders commits the simulated effect and deduplication in PostgreSQL.</text>
+<text x="80" y="1755" font-family="Open Sans, Arial, sans-serif" font-size="17" font-weight="400" fill="#5C6D80" text-anchor="start">Separate workloads and restricted flows are deployed. Observability and real model inference remain planned.</text>
+<text x="2480" y="1755" font-family="Open Sans, Arial, sans-serif" font-size="15" font-weight="600" fill="#5C6D80" text-anchor="end" letter-spacing="1">HLD 01  /  28 SEP 2026</text>
+</svg>

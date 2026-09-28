@@ -11,26 +11,36 @@ verify that unauthorized connections and actions are rejected.
 
 ## Current status
 
-**T01 and T02 are complete locally:** host prerequisite checks and a working
-simulated diagnosis interface are available. A04 passes through local HTTP.
-The lab cluster, durable execution, infrastructure automation, dashboards, and
-CI workflows are still planned; Kubernetes acceptance has not run.
+**T01–T05 are implemented and verified locally:** the durable simulated diagnosis
+application runs in a dedicated QEMU/Calico Kubernetes cluster. Ansible bootstrap,
+OpenTofu platform resources, Helm deployment, persistent storage, and network
+isolation have executed acceptance evidence. Distributed observability and CI
+remain the next increments.
 
-Implemented and verified:
+The platform includes separate API, worker, tool gateway and orders workloads;
+authenticated tools; approval-bound simulated restart; durable recovery and
+execution limits; and restricted database permissions. Tests cover application
+contracts, cluster behavior, allowed/denied connectivity, and authorization over
+an allowed connection. See [PROGRESS.md](docs/PROGRESS.md) for exact results.
 
-- A dedicated QEMU (`qemu2`) Minikube profile configuration in
-  [config/lab.json](config/lab.json).
-- `make doctor` for host capacity, KVM access, CLI versions, existing lab profile
-  settings, and the local kubectl context.
-- A localhost interface with healthy/degraded orders scenarios, a deterministic
-  read-only tool call, run IDs, tool evidence, duration, and execution results.
-- Twenty-three automated tests for preflight, execution, and HTTP behavior.
-- A scope baseline, implementation backlog, progress record, and QEMU decision.
+## Run the Kubernetes platform
 
-The last host check passed after installing the pinned OpenTofu version. The new
-`agentic-devops` profile has not been created. Existing profiles and unrelated
-Kubernetes contexts remain untouched. See [PROGRESS.md](docs/PROGRESS.md) for the
-actual validation evidence and next task.
+```sh
+make doctor
+make bootstrap
+make infra-plan
+make infra-apply
+make deploy
+make verify-cluster
+make verify-network
+make ui
+```
+
+Inspect the plan before applying. Open <http://127.0.0.1:8080> and enter `user_token`
+from the private `data/platform/credentials.json` file. Read the
+[platform demonstration](docs/PLATFORM_DEMO.md) for prerequisites, ownership,
+credentials, verification, and stopping the dedicated VM. All platform commands
+use a private kubeconfig and explicit lab context; unrelated profiles are preserved.
 
 ## Try the local simulation
 
@@ -48,30 +58,48 @@ examples. History is held in memory for up to 100 runs and disappears on restart
 The scripted adapter records the question but does not interpret it. It always
 calls the orders health tool; no restart or cloud/cluster action is available.
 
-## Planned architecture
+## Try durable execution
 
-The diagram below is the target M1 architecture. T02 currently implements the
-execution path as separate Python components within one local process, with an
-in-memory run store; PostgreSQL and the durable worker are T03.
+With native PostgreSQL 16 tools installed:
+
+```sh
+make setup
+make verify-durable
+make run-durable
+```
+
+Open <http://127.0.0.1:8080> and enter `user_token` from the private local settings
+file identified at startup. Scenarios include an explicit simulated restart
+approval, dependency timeout, and repeated tool calls. History survives restart.
+See [DURABLE_DEMO.md](docs/DURABLE_DEMO.md) for credentials, limits, API examples,
+and verification boundaries. `Ctrl+C` stops the owned services and database.
+
+## Architecture
+
+Start with the [high-level design](docs/HIGH_LEVEL_DESIGN.md) for the complete
+user journey, architecture diagrams, approval flow, platform delivery,
+observability, and the boundary between current functionality and future stages.
+
+The diagram shows the M1 architecture and planned telemetry/M2 extension. T04/T05
+deploy separate API, worker, tool gateway, orders, and database workloads with
+restricted network flows. The orders service owns the transaction containing
+the simulated restart, approval consumption, and deduplication result. The model
+adapter remains a component of the worker. Observability workloads are T06.
 
 M1 uses deterministic responses and tool calls visibly labeled **SIMULATED**.
 It demonstrates platform operations and tool contracts; real model integration
 belongs to M2.
 
-```mermaid
-flowchart LR
-    User[Local interface / API] --> DB[(PostgreSQL jobs and events)]
-    Worker[Agent worker] --> DB
-    Worker --> Model[Simulated model adapter]
-    Worker --> Tools[Tool service]
-    Tools --> Orders[Orders service simulator]
-    Tools --> DB
-```
+![Target architecture with numbered execution flow, platform delivery, and implementation boundaries](docs/assets/architecture-overview.svg)
 
-The worker will claim jobs from PostgreSQL using atomic leases. The tool service
-will validate identity, scope, arguments, approval, and idempotency before executing
-an action. A simulated restart will require explicit user approval. Operational
-events will be correlated through logs, metrics, and traces.
+[High-resolution PNG](docs/assets/architecture-overview.png) ·
+[Editable SVG](docs/assets/architecture-overview.svg) ·
+[Diagram source and export instructions](docs/assets/README.md)
+
+The durable worker claims jobs from PostgreSQL using atomic leases. The tool
+service validates identity, scope, arguments, approval, and idempotency. Simulated
+restart requires explicit user approval. Durable events are available by run ID;
+distributed logs, metrics, and traces are T06. See [ADR 0003](docs/decisions/0003-durable-execution.md).
 
 | Technology | Planned responsibility |
 | --- | --- |
@@ -99,9 +127,9 @@ make test
 make doctor
 ```
 
-The application and tests use Python's standard library; no Python dependencies
-need to be installed for this checkpoint. HTTP tests use temporary localhost
-servers. Exact platform CLI pins are in
+The T02 demo and regression tests use the standard library. T03 requires the
+pinned Psycopg dependency in `requirements.txt` and native PostgreSQL tools.
+HTTP tests use temporary localhost servers. Exact platform CLI pins are in
 [config/lab.json](config/lab.json).
 
 `make doctor` does not install tools, start a VM, change the current context, or
@@ -111,22 +139,22 @@ profile settings produce a nonzero exit. An absent lab profile is expected befor
 bootstrap. A sandbox may hide `/dev/kvm`; check host access before interpreting
 that result as a broken QEMU installation.
 
-Available targets are `make doctor`, `make test`, `make run`, and `make verify-local`.
-Bootstrap, deployment, full acceptance verification, cluster port-forwards, and
-cleanup commands described in the PRD remain future implementation contracts.
-A passing prerequisite check does not prove cluster readiness; local A04 evidence
-does not prove Kubernetes integration or the remaining acceptance scenarios.
+Available targets are `make doctor`, `make test`, `make run`, `make verify-local`,
+`make setup`, `make run-durable`, `make verify-durable`, `make bootstrap`,
+`make infra-plan`, `make infra-apply`, `make deploy`, `make ui`,
+`make verify-cluster`, and `make verify-network`. Full observability, CI,
+consolidated acceptance and scoped cleanup remain T06–T08.
 
 ## Isolation and access design
 
 The selected profile is `agentic-devops`, with driver `qemu2` and network `builtin`.
-The planned interface and dashboards will be accessible through localhost
-port-forwards. This QEMU network does not support `minikube service` or
+The interface is accessible through a localhost port-forward; dashboard access
+will use the same local access pattern in T06. This QEMU network does not support `minikube service` or
 `minikube tunnel`; see the [QEMU decision](docs/decisions/0001-qemu-lab-profile.md).
 
-The planned controls include default-deny network policies, restricted database
-permissions, authenticated tool calls, bounded execution, approval-bound actions,
-and idempotency keys. VM isolation does not replace pod network policies or
+T03–T05 implement restricted database permissions, authenticated tool calls,
+bounded execution, approval-bound actions, idempotency keys, and tested
+default-deny network policies. VM isolation does not replace pod network policies or
 application authorization. The agent will not receive unrestricted shell access
 or cluster administrator credentials.
 
@@ -152,11 +180,16 @@ question. This is a local educational lab, not a production platform.
 | Document | Purpose |
 | --- | --- |
 | [PRD](docs/prd.md) | Scope, ownership boundaries, scenarios, and acceptance criteria |
+| [Platform demonstration](docs/PLATFORM_DEMO.md) | Bootstrap, deploy and verify the isolated Kubernetes lab |
+| [Platform decision](docs/decisions/0004-local-platform-and-network.md) | Resource ownership, effect transaction, and network flows |
+| [High-level design](docs/HIGH_LEVEL_DESIGN.md) | Complete solution, architecture diagrams, execution flow, and current versus target capabilities |
 | [Implementation plan](docs/IMPLEMENTATION_PLAN.md) | Task backlog mapped to acceptance criteria |
 | [Progress](docs/PROGRESS.md) | Last verified checkpoint and next task |
 | [QEMU decision](docs/decisions/0001-qemu-lab-profile.md) | Driver selection, version baseline, and networking constraints |
 | [Local execution decision](docs/decisions/0002-local-simulated-execution.md) | T02 component boundaries and transition to durable execution |
-| [Local demonstration](docs/LOCAL_DEMO.md) | Run the interface and inspect expected results |
+| [Local demonstration](docs/LOCAL_DEMO.md) | Run the in-memory interface |
+| [Durable demonstration](docs/DURABLE_DEMO.md) | Run PostgreSQL, exercise approval and execution limits |
+| [Durable execution decision](docs/decisions/0003-durable-execution.md) | Claims, recovery, authorization, and transaction boundaries |
 
 ## License
 
