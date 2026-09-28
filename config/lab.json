@@ -1,0 +1,20 @@
+{
+  "profile": "agentic-devops",
+  "driver": "qemu2",
+  "network": "builtin",
+  "kubernetes": "1.34.12",
+  "cni": "calico",
+  "cpus": 4,
+  "memory_mib": 8192,
+  "minimum_host_memory_gib": 16,
+  "minimum_free_disk_gib": 30,
+  "tools": {
+    "minikube": "1.37.0",
+    "kubectl": "1.34.12",
+    "qemu-system-x86_64": "9.2.4",
+    "qemu-img": "9.2.4",
+    "ansible-playbook": "2.20.5",
+    "helm": "3.19.0",
+    "tofu": "1.10.6"
+  }
+}
