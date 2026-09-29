@@ -60,7 +60,7 @@ def validate_target(inventory):
     kubernetes = config.get('KubernetesConfig', {}).get('KubernetesVersion', '').removeprefix('v')
     if kubernetes != lab_platform.CONFIG['kubernetes']:
         raise RuntimeError('The profile Kubernetes version differs from the lab contract.')
-    if target.get('Status') == 'Running':
+    if target.get('Status') in ('OK', 'Running'):
         lab_platform.guard()
     elif target.get('Status') != 'Stopped':
         raise RuntimeError('The dedicated profile must be running or stopped before cleanup.')

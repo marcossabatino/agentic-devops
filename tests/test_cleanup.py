@@ -46,7 +46,7 @@ class CleanupGuardTests(unittest.TestCase):
                                              'kube_system_uid': 'known'}))
             with patch.object(cleanup.lab_platform, 'IDENTITY', identity), \
                     patch.object(cleanup.lab_platform, 'guard') as guard:
-                cleanup.validate_target({cleanup.PROFILE: self.profile('Running')})
+                cleanup.validate_target({cleanup.PROFILE: self.profile('OK')})
             guard.assert_called_once_with()
 
 
