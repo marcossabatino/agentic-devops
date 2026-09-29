@@ -12,7 +12,7 @@ Work through one guided learning increment at a time. Before an important archit
 | T04 — Reproducible local platform | Complete locally | Dedicated QEMU/Kubernetes 1.34.12 + Calico 3.30.3, Ansible repeat with changed=0, OpenTofu platform, Helm workloads, persistent PostgreSQL and localhost UI. Deployed scenarios and zero-change post-apply plan passed. | A01, A02, A03 |
 | T05 — Network isolation | Complete locally | 22 NetworkPolicies: default-deny, cluster DNS, seven symmetric service paths. Bounded positive/negative tests and HTTP authorization over an allowed path. Telemetry-specific paths accompany T06 workloads. | A06, A07 |
 | T06 — Observability and controlled failures | Complete locally | Collector/Prometheus/Tempo/Grafana deployed; 90 observability checks, six scenarios, 24 network connections and 26 PostgreSQL tests passed. Correlated logs/traces, bounded metrics, dashboard and scenario/reset commands verified. | A05, A10, A11 |
-| T07 — CI and deployment provenance | Pending | GitHub checks and image builds; intentional failure evidence; local deployment identifies the validated commit. | A12 |
+| T07 — CI and deployment provenance | Complete | Three GitHub jobs passed on PR and main; an intentional contract failure failed only its relevant job; deployment requires and exposes the exact successful main SHA and CI run. | A12 |
 | T08 — Verification, cleanup, and demonstration | Pending | `make verify` report, remaining metrics/runbook tool catalog, scoped cleanup with profile/context checks, and a ten-minute demonstration guide. | A01–A13 |
 | T09 — AWS integration | Deferred to M2 | Define account, region/model, budget, temporary credentials, connector egress, separate state, and OIDC scope before implementation. | A14 |
 
@@ -22,17 +22,15 @@ The ordering follows PRD section 13. Individual tasks may span multiple 60–90-
 
 The user selected QEMU for the dedicated `agentic-devops` profile. [ADR 0001](decisions/0001-qemu-lab-profile.md) records the choice, network limitations, and version-selection evidence. The existing `minikube` profile remains untouched.
 
-T01–T06 have local execution evidence in [Progress](PROGRESS.md). The deployed
+T01–T07 have execution evidence in [Progress](PROGRESS.md). The deployed
 platform includes separate services, persistent application storage, stable
 OpenTofu state, tested network isolation and correlated observability. Standalone
 T02/T03 demos remain available. [T06 guide](OBSERVABILITY_DEMO.md) describes the
 six scenarios, dashboard, log/trace lookup, reset and ephemeral telemetry limits.
 
-Next is **T07 — CI and deployment provenance**: GitHub checks and image builds,
-intentional failure evidence, and local deployment of an identifiable validated
-commit. Publishing workflows and remote execution belong to that increment.
-Full acceptance/cleanup and the dedicated metrics/runbook tools are assigned to
-T08 before M1 closes. AWS remains deferred to M2.
+Next is **T08 — Verification, cleanup, and demonstration**: consolidate A01–A13,
+complete the dedicated metrics/runbook tool catalog, add guarded cleanup, and
+write the ten-minute demonstration. AWS remains deferred to M2.
 
-Learning question: how will you prove that the image running locally corresponds
-to the exact commit that passed GitHub checks, especially with a dirty worktree?
+Learning question: which evidence should `make verify` retain so a later reviewer
+can distinguish a passed acceptance check from a capability that was only built?
