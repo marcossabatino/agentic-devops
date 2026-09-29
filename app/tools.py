@@ -5,7 +5,7 @@ from time import sleep
 from psycopg.types.json import Jsonb
 
 from app.contracts import (ARGUMENTS, METRICS_TOOL, READ_TOOL, READ_TOOLS,
-                           RESTART_TOOL, RUNBOOK_TOOL, Rejected, uuid_text)
+                           RESTART_TOOL, Rejected, uuid_text)
 from app.http_service import service_server
 from app.runtime import OrdersSimulator
 from app import telemetry as tel
