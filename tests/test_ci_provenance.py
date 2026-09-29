@@ -9,9 +9,6 @@ SHA = 'a' * 40
 
 
 class ProvenanceTests(unittest.TestCase):
-    def test_intentional_ci_failure(self):
-        self.fail('T07 intentional failure evidence')
-
     def command(self, *, branch='main', dirty='', remote=SHA, conclusion='success',
                 run_sha=SHA, event='push'):
         calls = []
