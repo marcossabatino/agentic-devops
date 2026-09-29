@@ -9,6 +9,7 @@ import subprocess
 import secrets
 
 from app.server import revision
+from scripts.ci_provenance import validated_commit
 
 ROOT = Path(__file__).resolve().parents[1]
 CONFIG = json.loads((ROOT / 'config/lab.json').read_text())
@@ -81,17 +82,18 @@ def apply_secret(name, namespace, data):
     print(f'Credential Secret ready: {namespace}/{name} (values redacted)', flush=True)
 
 
-def image_tag():
+def image_tag(source_revision=None):
     digest = hashlib.sha256()
     files = [ROOT / 'Dockerfile', ROOT / 'requirements.txt', ROOT / 'config/images.json', *sorted((ROOT / 'app').rglob('*'))]
     for path in files:
         if path.is_file() and '__pycache__' not in path.parts and path.suffix != '.pyc':
             digest.update(str(path.relative_to(ROOT)).encode())
             digest.update(path.read_bytes())
-    return 'v' + revision().removesuffix('-dirty') + '-' + digest.hexdigest()[:12]
+    return 'v' + (source_revision or revision()).removesuffix('-dirty')[:12] + '-' + digest.hexdigest()[:12]
 
 
 def deploy():
+    provenance = validated_commit()
     config = credentials()
     for role, namespace in [('api', 'lab-app'), ('worker', 'lab-app'), ('tools', 'lab-tools'), ('orders', 'lab-tools')]:
         config_part = {'database_password': config[role]}
@@ -103,7 +105,7 @@ def deploy():
     apply_secret('migrate-credentials', 'lab-data', {'credentials.json': json.dumps({
         'database_password': config['owner'], 'roles': {role: config[role] for role in ('api', 'worker', 'tools', 'orders')}})})
     images = json.loads((ROOT / 'config/images.json').read_text())
-    tag = image_tag()
+    tag = image_tag(provenance['source_revision'])
     command(['docker', 'build', '--build-arg', 'PYTHON_IMAGE=' + images['python'],
              '-t', 'agentic-devops:' + tag, '.'])
     command(['minikube', '-p', PROFILE, 'image', 'load', 'agentic-devops:' + tag])
@@ -112,10 +114,12 @@ def deploy():
              '--kubeconfig', str(KUBECONFIG), '--kube-context', PROFILE, '-n', 'lab-app',
              '--set-string', 'image.tag=' + tag,
              '--set-string', 'postgres.image=' + images['postgres'],
-             '--set-string', 'sourceRevision=' + revision(),
+             '--set-string', 'sourceRevision=' + provenance['source_revision'],
              '--wait', '--wait-for-jobs', '--timeout', '8m', '--history-max', '3'])
-    build = {'image': 'agentic-devops:' + tag, 'source_revision': revision(),
-             'cluster': json.loads(IDENTITY.read_text()), 'postgres_image': images['postgres']}
+    build = {'image': 'agentic-devops:' + tag, **provenance,
+             'cluster': json.loads(IDENTITY.read_text()), 'postgres_image': images['postgres'],
+             'image_id': command(['docker', 'image', 'inspect', '--format', '{{.Id}}',
+                                  'agentic-devops:' + tag], capture=True).stdout.strip()}
     (PRIVATE / 'build.json').write_text(json.dumps(build, indent=2) + '\n')
     print('Deployment ready. Use make ui; user_token is in data/platform/credentials.json.', flush=True)
 
