@@ -2,10 +2,10 @@
 
 Date: 2026-09-29. Design baseline: [PRD v0.2](prd.md).
 
-This document describes the complete intended solution and distinguishes it from
-the implemented T07 checkpoint. **The diagrams include the complete target**.
-Kubernetes application deployment, isolation, observability and CI provenance
-are verified; AWS remains future work.
+This document describes the complete intended solution and distinguishes local
+M1 from optional cloud extensions. **The diagrams include both boundaries**.
+Kubernetes application deployment, isolation, observability, CI provenance,
+consolidated verification and scoped cleanup are verified; AWS remains future work.
 
 ![Architecture overview: numbered execution flow, deployment boundaries, observability, and future Bedrock integration](assets/architecture-overview.svg)
 
@@ -26,7 +26,7 @@ that requires a restart, it displays the exact proposed action and waits for
 your approval. After approval, the tool performs one simulated effect and the
 interface displays the result. Repeating a request must not duplicate that effect.
 
-At the end of M1, you will also be able to rebuild the local platform, inject
+M1 can rebuild the local platform, inject
 failures, follow an execution through telemetry, demonstrate allowed and denied
 connections/actions, validate the source revision, and remove only lab resources.
 
@@ -109,9 +109,10 @@ the T03 effect contract; see [ADR 0004](decisions/0004-local-platform-and-networ
 | Orders simulator | Produce controlled healthy, degraded, and slow behavior | Repeatable observations and a simulated restart effect |
 | PostgreSQL | Preserve job ownership, history, approval, and deduplication records | Recovery after restart and evidence tied to a run ID |
 
-Target tools include reading health, querying synthetic metrics, retrieving a
-runbook, and an approval-gated simulated restart. The current implementation provides health and
-restart; dedicated metrics-query and runbook tools remain to be implemented.
+The allowlisted tools read health, query bounded synthetic metrics, retrieve a
+runbook, and perform an approval-gated simulated restart. The first three share
+the read scope. Restart alone requires the restart scope, exact approval binding,
+and an idempotency key.
 
 ## 3. Diagnosis and approval flow
 
@@ -230,9 +231,9 @@ runner is only an optional M3 extension.
 
 The target command journey is `doctor` → `bootstrap` → `infra-plan` /
 `infra-apply` → `deploy` → `ui` / `dashboards` → `verify` → scoped `destroy`.
-Bootstrap, plan/apply, deploy, UI access, cluster verification and network
-verification are implemented. Dashboards, consolidated verification and scoped
-destruction remain future increments; see the [README](../README.md).
+Bootstrap, plan/apply, deploy, UI/dashboard access, cluster and network checks,
+consolidated verification and scoped destruction are implemented; see the
+[README](../README.md).
 
 ## 6. How you observe a diagnosis
 
@@ -286,17 +287,17 @@ to AWS is a separate architecture exercise, not an implied M2 requirement.
 
 ## 8. Current implementation versus complete solution
 
-| Capability | Now: T01–T07 | Remaining work |
+| Capability | Now: local M1 / T01–T08 | Remaining work |
 | --- | --- | --- |
 | Local diagnosis UI and synthetic health evidence | Implemented locally and deployed in Kubernetes, with trace ID in the UI | Continued usability improvements |
 | Durable jobs, recovery, authentication, approval, deduplication | Tested with real PostgreSQL, HTTP and deployed services | Continued regression coverage |
 | Component isolation | Separate API, worker, tool gateway, orders and PostgreSQL workloads | Adapter remains in the worker; a separate model service is not needed for M1 |
-| Dedicated cluster and repeatable deployment | QEMU/Calico, second bootstrap changed=0, OpenTofu no-change plan, Helm and persistent volume verified | Full cleanup and backup workflow remain later scope |
+| Dedicated cluster and repeatable deployment | QEMU/Calico, second bootstrap changed=0, OpenTofu no-change plan, Helm, persistent volume and guarded cleanup verified | Backup/restore remains outside M1 |
 | Network isolation | Default-deny, DNS, seven application and eleven telemetry paths; positive and negative TCP tests | Continued regression coverage |
-| Failure evidence | Correlated logs/traces, metrics/dashboard, timeout, step limit, deadline, scenario/reset and recovery tests | Consolidated M1 verification |
-| Metrics and runbook tools | Not implemented as dedicated tools | Complete the PRD catalog in T08 before M1 closes |
+| Failure evidence | Correlated logs/traces, metrics/dashboard, timeout, step limit, deadline, scenario/reset, recovery and consolidated verification | Continued regression coverage |
+| Metrics and runbook tools | Dedicated allowlisted synthetic metrics and runbook reads are executed for degraded diagnosis | Real operational integrations remain outside M1 |
 | CI and deployment provenance | GitHub checks/build, intentional failure evidence and exact successful main SHA enforced at deploy | Registry publication remains outside local M1 |
-| Complete acceptance and cleanup | Local, cluster and network test/report commands | T08 consolidated verification, scoped cleanup, ten-minute demonstration |
+| Complete acceptance and cleanup | A01–A13 consolidated report, preserved-context/profile proof and ten-minute demonstration | M1 complete |
 | Real model inference | No LLM calls | M2 / T09 Bedrock integration |
 
 M1 is complete when the platform can be recreated, scenarios behave as expected,
@@ -304,6 +305,7 @@ unauthorized paths/actions fail, runs can be investigated through telemetry,
 the deployed revision is identifiable, and cleanup preserves unrelated resources.
 The acceptance baseline remains [A01–A13 in the PRD](prd.md#10-scenarios-and-acceptance-criteria).
 
-For executed evidence, read [Progress](PROGRESS.md). To try the deployed
-behavior, follow the [platform demonstration](PLATFORM_DEMO.md). For the next
-increment, consult the [implementation plan](IMPLEMENTATION_PLAN.md).
+For executed evidence, read [Progress](PROGRESS.md). To present and then remove
+the complete lab, follow the [final demonstration](FINAL_DEMO.md). Any next
+increment is optional M2 and requires the AWS decisions in the
+[implementation plan](IMPLEMENTATION_PLAN.md).

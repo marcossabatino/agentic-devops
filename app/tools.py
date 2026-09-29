@@ -4,7 +4,8 @@ from time import sleep
 
 from psycopg.types.json import Jsonb
 
-from app.contracts import ARGUMENTS, READ_TOOL, RESTART_TOOL, Rejected, uuid_text
+from app.contracts import (ARGUMENTS, METRICS_TOOL, READ_TOOL, READ_TOOLS,
+                           RESTART_TOOL, RUNBOOK_TOOL, Rejected, uuid_text)
 from app.http_service import service_server
 from app.runtime import OrdersSimulator
 from app import telemetry as tel
@@ -15,7 +16,7 @@ def validate_call(credentials, authorization, payload):
     if not isinstance(payload, dict) or set(payload) != {'run_id', 'tool', 'arguments', 'idempotency_key'}:
         raise Rejected('INVALID_TOOL_REQUEST', 400)
     tool, arguments, key = payload['tool'], payload['arguments'], payload['idempotency_key']
-    if tool not in (READ_TOOL, RESTART_TOOL) or arguments != ARGUMENTS:
+    if tool not in (*READ_TOOLS, RESTART_TOOL) or arguments != ARGUMENTS:
         raise Rejected('INVALID_TOOL_ARGUMENTS', 400)
     run_id = uuid_text(payload['run_id'])
     if tool == RESTART_TOOL:
@@ -36,16 +37,27 @@ class DurableTools:
             row = conn.execute('SELECT data FROM jobs WHERE run_id = %s', (run_id,)).fetchone()
             if not row:
                 raise Rejected('RUN_NOT_FOUND', 404)
-            if tool == READ_TOOL:
+            if tool in READ_TOOLS:
                 scenario = row['data']['scenario']
-                if scenario in ('tool-timeout', 'deadline-exceeded'):
+                if tool == READ_TOOL and scenario in ('tool-timeout', 'deadline-exceeded'):
                     # Bounded delay, larger than the default client deadline.
                     sleep(0.75)
                     raise Rejected('TOOL_UNAVAILABLE', 503)
                 state = conn.execute('SELECT restart_count FROM orders_state WHERE run_id = %s',
                                      (run_id,)).fetchone()
                 healthy = scenario in ('healthy', 'step-limit') or bool(state and state['restart_count'])
-                return OrdersSimulator().health('healthy' if healthy else 'orders-errors')
+                if tool == READ_TOOL:
+                    return OrdersSimulator().health('healthy' if healthy else 'orders-errors')
+                if tool == METRICS_TOOL:
+                    return {'service': 'orders', 'window': '5m', 'requests': 1000,
+                            'error_rate': 0.0 if healthy else 0.35,
+                            'p95_latency_ms': 24 if healthy else 420, 'simulated': True}
+                return {'service': 'orders', 'runbook_id': 'orders-degraded-v1',
+                        'title': 'Orders degraded response',
+                        'steps': ['Confirm health and synthetic error metrics.',
+                                  'Inspect the correlated run trace.',
+                                  'Request approval before a simulated restart.'],
+                        'simulated': True}
             # Serialize on the key as well as the approval to cover concurrent duplicates
             # and a caller reusing the same key for a different run.
             conn.execute('SELECT pg_advisory_xact_lock(hashtextextended(%s, 0))', (key,))

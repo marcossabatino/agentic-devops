@@ -11,7 +11,7 @@ verify that unauthorized connections and actions are rejected.
 
 ## Current status
 
-**T01–T07 are implemented and verified:** the durable simulated diagnosis
+**T01–T08 and local M1 are implemented and verified:** the durable simulated diagnosis
 application runs in a dedicated QEMU/Calico Kubernetes cluster. Ansible bootstrap,
 OpenTofu platform resources, Helm deployment, persistent storage, and network
 isolation have executed acceptance evidence. Correlated logs, metrics, traces,
@@ -23,7 +23,9 @@ The platform includes separate API, worker, tool gateway and orders workloads;
 authenticated tools; approval-bound simulated restart; durable recovery and
 execution limits; and restricted database permissions. Tests cover application
 contracts, cluster behavior, allowed/denied connectivity, and authorization over
-an allowed connection. See [PROGRESS.md](docs/PROGRESS.md) for exact results.
+an allowed connection. The complete read-only catalog includes health, synthetic
+metrics and a runbook. `make verify` consolidates A01–A12 and guarded cleanup
+proves A13. See [PROGRESS.md](docs/PROGRESS.md) for exact results.
 
 ## Run the Kubernetes platform
 
@@ -36,6 +38,7 @@ make deploy
 make verify-cluster
 make verify-network
 make verify-observability
+make verify
 make ui
 ```
 
@@ -164,8 +167,11 @@ Available targets are `make doctor`, `make test`, `make run`, `make verify-local
 `make setup`, `make run-durable`, `make verify-durable`, `make bootstrap`,
 `make infra-plan`, `make infra-apply`, `make deploy`, `make ui`,
 `make verify-cluster`, `make verify-network`, `make dashboards`, `make scenario`,
-`make reset`, `make logs`, `make verify-static`, and `make verify-observability`.
-Consolidated acceptance and scoped cleanup remain T08.
+`make reset`, `make logs`, `make verify-static`, `make verify-observability`,
+`make verify`, and `make destroy CONFIRM=agentic-devops`. `make verify` runs
+consolidated M1 acceptance. After retaining its evidence,
+`make destroy CONFIRM=agentic-devops` deletes only the guarded lab profile and
+local runtime state. Follow the [final ten-minute demonstration](docs/FINAL_DEMO.md).
 
 ## Isolation and access design
 
@@ -189,7 +195,8 @@ files already tracked by Git; inspect staged changes before committing.
 ## Roadmap and learning workflow
 
 - **M1 — Verifiable local platform:** simulated execution, reproducible deployment,
-  network and authorization tests, telemetry, controlled failures, and CI.
+  network and authorization tests, telemetry, controlled failures, CI, consolidated
+  verification, and scoped cleanup. **Complete.**
 - **M2 — AWS integration:** Amazon Bedrock, restricted temporary credentials,
   separate AWS infrastructure/state, GitHub OIDC, and model usage/cost visibility.
 - **M3 — Optional extensions:** Datadog export, an authenticated MCP tool,
@@ -202,6 +209,8 @@ question. This is a local educational lab, not a production platform.
 | Document | Purpose |
 | --- | --- |
 | [PRD](docs/prd.md) | Scope, ownership boundaries, scenarios, and acceptance criteria |
+| [Final ten-minute demonstration](docs/FINAL_DEMO.md) | Present the complete local M1 flow and guarded teardown |
+| [Verification and cleanup decision](docs/decisions/0007-verification-and-scoped-cleanup.md) | Consolidated evidence, tool catalog and A13 guardrails |
 | [Observability demonstration](docs/OBSERVABILITY_DEMO.md) | Correlate runs, logs and traces; exercise controlled failures |
 | [Observability decision](docs/decisions/0005-observability-and-controlled-failures.md) | Trace propagation, metrics, retention and scenario/reset semantics |
 | [CI and validated deployment](docs/CI_DEMO.md) | GitHub checks, intentional failure evidence and exact-commit deployment |

@@ -1,6 +1,62 @@
 # Progress
 
-## Last verified checkpoint — T07, 2026-09-29
+## Last verified checkpoint — T08 / local M1, 2026-09-29
+
+**T08 and local M1 are complete without AWS.** The final increment completes the
+allowlisted diagnostic tool catalog, consolidates A01–A12 under `make verify`,
+and executes A13 through guarded deletion of the dedicated lab profile. Bedrock
+and all AWS controls remain an optional, separately authorized M2/T09 increment.
+
+### Delivered
+
+- `query_orders_metrics` and `get_orders_runbook` join `read_orders_health` as
+  authenticated read-only tools. The degraded scenario records all three steps,
+  including bounded five-minute synthetic metrics and the allowlisted response
+  procedure. The existing restart path retains its distinct scope, approval
+  binding and transactional idempotency.
+- `make verify` runs preflight, standard tests, cluster-free IaC/chart checks,
+  bootstrap twice, real PostgreSQL contracts, live cluster scenarios, network
+  isolation and correlated observability. It requires the second Ansible recap
+  to have zero changes and writes `artifacts/m1-verification.json` plus per-step
+  logs. A01–A12 must pass; A13 stays visibly NOT_RUN until teardown executes.
+- `make destroy CONFIRM=agentic-devops` validates the recorded target and pinned
+  profile configuration, checks the live cluster UID when running, snapshots
+  unrelated Minikube profiles and the global kubectl configuration, deletes only
+  the named profile, and requires those snapshots to remain equal. Only private
+  platform data and local OpenTofu/Ansible runtime files are then removed.
+- The [final ten-minute demonstration](FINAL_DEMO.md),
+  [ADR 0007](decisions/0007-verification-and-scoped-cleanup.md), refreshed HLD,
+  architecture artwork, platform guide, task plan and README close local M1.
+
+### Executed evidence
+
+- The real PostgreSQL suite passed all **26 tests** with no skips, including the
+  new three-tool degraded diagnosis and the existing authorization, approval,
+  concurrency, idempotency, recovery, deadline and step-limit contracts.
+- `make verify` completed every step and retained PASS evidence for A01–A12. The
+  live deployment matched the exact successful `main` CI push revision; the
+  deployed degraded scenario used health, metrics and runbook in that order.
+- Guarded cleanup removed only the `agentic-devops` profile. The unrelated
+  `minikube` profile and the host's Kubernetes contexts were canonically
+  identical before and after deletion. The cleanup
+  report promoted A13 and the consolidated M1 result to **PASS**.
+
+Generated evidence remains ignored under `artifacts/`, including
+`m1-verification.json`, `verify/*.log`, and `a13-cleanup.json`. Cleanup removes
+the private kubeconfig, credentials, cluster identity, build metadata, local
+state/plan and VM-backed PostgreSQL data. Git source, Docker cache and sanitized
+acceptance evidence remain.
+
+### Boundary after M1
+
+This lab demonstrates a deterministic simulated agent platform on one local
+cluster. It does not claim real LLM inference, AWS IAM/OIDC, cloud networking,
+production availability, backup recovery, artifact signing, or a published image.
+There is no required next task. If M2 is chosen, first define the AWS account,
+region/model availability, budget, temporary credentials, connector egress,
+separate state and OIDC scope before implementing T09.
+
+## Previous verified checkpoint — T07, 2026-09-29
 
 **T07 is complete.** GitHub now checks application contracts, infrastructure and
 charts, and the Docker build on pull requests and pushes to `main`. Local cluster

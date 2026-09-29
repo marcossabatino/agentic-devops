@@ -6,7 +6,10 @@ from uuid import UUID
 
 SCENARIOS = ('healthy', 'orders-errors', 'restart-required', 'tool-timeout', 'step-limit', 'deadline-exceeded')
 READ_TOOL = 'read_orders_health'
+METRICS_TOOL = 'query_orders_metrics'
+RUNBOOK_TOOL = 'get_orders_runbook'
 RESTART_TOOL = 'restart_orders'
+READ_TOOLS = (READ_TOOL, METRICS_TOOL, RUNBOOK_TOOL)
 ARGUMENTS = {'service': 'orders'}
 
 

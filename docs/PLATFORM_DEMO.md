@@ -1,4 +1,4 @@
-# Deployed local platform — T04/T05
+# Deployed local platform — local M1
 
 This mode deploys the simulated diagnosis application into the dedicated
 `agentic-devops` QEMU Minikube profile. It preserves other profiles and the global
@@ -107,11 +107,16 @@ belong to OpenTofu's resource ownership.
 - PostgreSQL uses Minikube hostpath storage. Pod replacement preserves history;
   destroying the VM can destroy it. This lab does not claim HA or backup recovery.
 - To stop compute without deleting data, use `minikube stop -p agentic-devops`.
-  `make bootstrap` starts the same profile again. Full scoped deletion remains T08.
+  `make bootstrap` starts the same profile again.
+- After retaining acceptance evidence, `make destroy CONFIRM=agentic-devops`
+  validates the dedicated target, deletes only that profile, verifies unrelated
+  Minikube profiles and global kubectl contexts are unchanged, and removes the
+  project-private runtime files. Database history is destroyed with the VM.
 - If a migration fails, inspect only its Job logs in `lab-data`. Do not rotate
   credentials or delete the database to hide a failed migration.
 - The source revision may include `-dirty` until the code is committed. T07 will
   add GitHub CI provenance; a local image build is not evidence of passing CI.
 
-T06 adds [observability and controlled failures](OBSERVABILITY_DEMO.md).
-The next implementation task is T07: GitHub CI and deployment provenance.
+T06 adds [observability and controlled failures](OBSERVABILITY_DEMO.md), T07 adds
+[CI provenance](CI_DEMO.md), and T08 closes local M1 with
+[consolidated verification and the final demonstration](FINAL_DEMO.md).

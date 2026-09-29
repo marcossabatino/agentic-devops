@@ -16,7 +16,8 @@ ENABLED = os.environ.get('LAB_POSTGRES_TESTS') == '1'
 if ENABLED:
     import psycopg
     from app.api import durable_server
-    from app.contracts import ARGUMENTS, READ_TOOL, RESTART_TOOL, Credentials, Policy, Rejected
+    from app.contracts import (ARGUMENTS, METRICS_TOOL, READ_TOOL, RESTART_TOOL,
+                               RUNBOOK_TOOL, Credentials, Policy, Rejected)
     from app.database import Database
     from app.tools import DurableTools
     from app.worker import ToolClient, Worker
@@ -112,6 +113,10 @@ class DurableTests(unittest.TestCase):
         self.worker.once()
         result = self.api_db.get(run['run_id'])
         self.assertEqual((result['status'], result['outcome']), ('completed', 'degraded'))
+        self.assertEqual([step['tool'] for step in result['steps']],
+                         [READ_TOOL, METRICS_TOOL, RUNBOOK_TOOL])
+        self.assertEqual(result['steps'][1]['result']['error_rate'], 0.35)
+        self.assertEqual(result['steps'][2]['result']['runbook_id'], 'orders-degraded-v1')
 
     def test_a07_authentication_and_scope_on_reachable_tool(self):
         run = self.create()

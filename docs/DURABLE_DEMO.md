@@ -75,8 +75,10 @@ PY
 ```
 
 The private tool HTTP service requires worker scopes. It accepts only
-`read_orders_health` and `restart_orders`, with exact orders arguments.
-Restart additionally requires an unexpired bound approval and an idempotency key.
+`read_orders_health`, `query_orders_metrics`, `get_orders_runbook`, and
+`restart_orders`, with exact orders arguments. The first three are read-only;
+the degraded diagnosis records them in that order. Restart additionally requires
+the restart scope, an unexpired bound approval, and an idempotency key.
 Two identical authorized requests return the same stored result with one effect.
 Reusing the approval with another key or using the key for another run fails.
 

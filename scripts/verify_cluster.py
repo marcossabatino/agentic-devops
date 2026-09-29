@@ -9,6 +9,7 @@ import tempfile
 import time
 
 from app.runtime import now
+from app.contracts import METRICS_TOOL, READ_TOOL, RUNBOOK_TOOL
 from scripts.lab_platform import CONFIG, KUBECONFIG, PRIVATE, PROFILE, ROOT, environment, guard, kubectl
 
 
@@ -127,6 +128,10 @@ def verify():
                     check('separate_orders_service_effect', run['status'] == 'completed' and run['steps'][-1]['result']['restart_count'] == 1)
                 elif scenario in ('healthy', 'orders-errors'):
                     check(scenario + '_outcome', run['status'] == 'completed' and run['outcome'] == ('healthy' if scenario == 'healthy' else 'degraded'))
+                    if scenario == 'orders-errors':
+                        check('orders_errors_uses_complete_read_catalog',
+                              [step['tool'] for step in run['steps']] ==
+                              [READ_TOOL, METRICS_TOOL, RUNBOOK_TOOL])
                 else:
                     expected = 'TOOL_TIMEOUT' if scenario == 'tool-timeout' else 'STEP_LIMIT'
                     check(scenario + '_bounded_failure', run['status'] == 'failed' and run['error'] == expected)

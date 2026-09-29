@@ -1,4 +1,4 @@
-.PHONY: doctor test run verify-local
+.PHONY: doctor test run verify-local verify destroy
 
 PORT ?= 8080
 
@@ -13,6 +13,12 @@ run:
 
 verify-local:
 	@python3 -B -m scripts.verify_local
+
+verify:
+	@python3 -B -m scripts.verify_all
+
+destroy:
+	@python3 -B -m scripts.cleanup --confirm "$(CONFIRM)"
 
 .PHONY: setup run-durable verify-durable
 PYTHON_DURABLE ?= .venv/bin/python

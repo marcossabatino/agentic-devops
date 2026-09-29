@@ -8,7 +8,8 @@ from datetime import datetime, timezone
 
 import psycopg
 
-from app.contracts import ARGUMENTS, READ_TOOL, RESTART_TOOL, Rejected
+from app.contracts import (ARGUMENTS, METRICS_TOOL, READ_TOOL, RESTART_TOOL,
+                           RUNBOOK_TOOL, Rejected)
 from app.runtime import SimulatedAdapter
 from app import telemetry as tel
 
@@ -77,11 +78,16 @@ class Worker:
     def execute(self, job):
         data = job['data']
         restart = 'approval_id' in data
+        plan = ([RESTART_TOOL] if restart else
+                [READ_TOOL, METRICS_TOOL, RUNBOOK_TOOL]
+                if data['scenario'] == 'orders-errors' else [READ_TOOL])
+        plan_index = 0
+        health_result = None
         retries = 0
         while True:
             with tel.span('model.decide') as current:
                 current.set_attribute('lab.model.mode', 'SIMULATED')
-                tool = RESTART_TOOL if restart else READ_TOOL
+                tool = READ_TOOL if data['scenario'] == 'step-limit' else plan[plan_index]
             number = self.db.reserve_step(job, tool, ARGUMENTS)
             remaining = (job['deadline'] - datetime.now(timezone.utc)).total_seconds()
             if remaining <= 0:
@@ -115,6 +121,9 @@ class Worker:
                     retries += 1
                     continue
                 raise failure
+            retries = 0
+            if tool == READ_TOOL:
+                health_result = result
             if data['scenario'] == 'step-limit':
                 continue
             if data['scenario'] == 'restart-required' and not restart:
@@ -122,8 +131,11 @@ class Worker:
                                pending_approval={'tool': RESTART_TOOL, 'arguments': ARGUMENTS},
                                summary='Orders is degraded. A simulated restart needs your approval.')
                 return
+            plan_index += 1
+            if plan_index < len(plan):
+                continue
             with tel.span('model.summarize'):
-                outcome, summary = SimulatedAdapter().summarize(result)
+                outcome, summary = SimulatedAdapter().summarize(health_result or result)
             if restart:
                 summary = 'The approved simulated restart completed. Orders is healthy.'
             self.db.finish(job, 'completed', outcome=outcome, summary=summary)
