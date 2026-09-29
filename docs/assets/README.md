@@ -44,7 +44,8 @@ every diagnosis. The observability strip describes cross-cutting capabilities;
 it is not a detailed telemetry routing diagram. The human gate is an annotation
 on the API approval flow, not an additional service.
 
-T04–T06 run separate Kubernetes workloads with restricted network paths and telemetry. The
+T04–T07 run separate Kubernetes workloads with restricted network paths,
+telemetry and validated deployment provenance. The
 orders service owns the PostgreSQL transaction containing its simulated effect
 and deduplication. Observability releases are deployed; Bedrock remains future work. See the [HLD](../HIGH_LEVEL_DESIGN.md) for detailed flows.
 

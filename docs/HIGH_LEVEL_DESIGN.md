@@ -3,9 +3,9 @@
 Date: 2026-09-29. Design baseline: [PRD v0.2](prd.md).
 
 This document describes the complete intended solution and distinguishes it from
-the implemented T06 checkpoint. **The diagrams include the complete target**.
-Kubernetes application deployment and network isolation are verified; distributed
-observability is deployed by T06; CI and AWS remain future work.
+the implemented T07 checkpoint. **The diagrams include the complete target**.
+Kubernetes application deployment, isolation, observability and CI provenance
+are verified; AWS remains future work.
 
 ![Architecture overview: numbered execution flow, deployment boundaries, observability, and future Bedrock integration](assets/architecture-overview.svg)
 

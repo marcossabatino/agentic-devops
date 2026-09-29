@@ -1,6 +1,78 @@
 # Progress
 
-## Last verified checkpoint — T06, 2026-09-29
+## Last verified checkpoint — T07, 2026-09-29
+
+**T07 is complete.** GitHub now checks application contracts, infrastructure and
+charts, and the Docker build on pull requests and pushes to `main`. Local cluster
+deployment fails closed unless the clean local `main` commit exactly matches
+`origin/main` and that SHA has a successful completed CI push run.
+
+### Delivered
+
+- A three-job [GitHub Actions workflow](../.github/workflows/ci.yml) with read-only
+  repository permission, bounded timeouts and concurrency cancellation. All
+  external actions are pinned to full commits and use their Node 24 releases.
+- Python/HTTP regression and real disposable PostgreSQL contracts; Ruff and
+  JavaScript syntax; Ansible lint; cluster-free OpenTofu format/init/validate;
+  Helm lint/render; and an application image build from the pinned base digest.
+- `make verify-static` shares the cluster-free infrastructure and chart checks
+  with local development. CI receives no lab kubeconfig, state or credentials
+  and does not contact the localhost Kubernetes API.
+- A deployment provenance gate that requires clean `main`, exact `origin/main`,
+  and a green **push** run for the full SHA before credentials, image build or
+  cluster changes. A green pull-request run alone is rejected.
+- The full validated SHA is injected into every workload and exposed by API info,
+  new run history, UI and startup logs. Private `data/platform/build.json` records
+  the CI run/URL, image ID/tag, pinned PostgreSQL image and guarded cluster UID.
+- [CI demonstration](CI_DEMO.md), [ADR 0006](decisions/0006-ci-and-deployment-provenance.md),
+  README/HLD updates and stronger cluster provenance checks.
+
+### Executed evidence
+
+- [PR #1](https://github.com/marcossabatino/agentic-devops/pull/1) ran all three
+  jobs. Initial and Node 24 revisions passed. A temporary failing contract at
+  commit `ca4430c` caused run
+  [36584005320](https://github.com/marcossabatino/agentic-devops/actions/runs/36584005320)
+  to fail only **Python and PostgreSQL contracts**; infrastructure and image jobs
+  remained green. The test was removed, and corrected run
+  [36584133420](https://github.com/marcossabatino/agentic-devops/actions/runs/36584133420)
+  passed all three jobs. Final PR run
+  [36612767903](https://github.com/marcossabatino/agentic-devops/actions/runs/36612767903)
+  also passed before squash integration.
+- Main push run
+  [36612912372](https://github.com/marcossabatino/agentic-devops/actions/runs/36612912372)
+  passed all three jobs for full SHA `6317693130b140f27d4b90584385e9e84304dda5`.
+  The authenticated gate accepted it and deployed image
+  `agentic-devops:v6317693130b1-3a292799d922`, image ID
+  `sha256:a619c764602328ab4c6ec7e854295680f88fb030a63cd254e3f301f2e2fe92aa`.
+- `make verify-cluster`: **33 checks passed**. All four Deployments used the
+  recorded image and full SHA; API info and all five exercised scenario histories
+  returned that SHA. Persistence after PostgreSQL pod replacement and the
+  OpenTofu no-change plan also passed.
+- Local checks passed: **56 standard tests** (26 PostgreSQL cases intentionally
+  skipped there), **26 real PostgreSQL tests**, Ansible/OpenTofu/Helm validation,
+  Ruff, JavaScript syntax and a Docker build. A feature-branch `make deploy`
+  stopped before any cluster mutation as designed.
+
+Evidence is retained by GitHub at the linked runs. Sanitized local output remains
+in ignored `artifacts/t07-*.log`; exact current deploy metadata remains private in
+`data/platform/build.json`. The workflow builds but does not publish images.
+GitHub-hosted runners do not receive access to the local cluster.
+
+### Boundaries and next task
+
+This is local M1 provenance, not artifact signing or a registry supply-chain
+claim. GitHub and authenticated `gh` are required when deploying. Any later
+source change requires its own successful main push run before another deploy.
+No self-hosted runner or public Kubernetes endpoint was added.
+
+Next: **T08 — Verification, cleanup, and demonstration**. Consolidate A01–A13 in
+`make verify`, implement guarded cleanup that preserves unrelated profiles and
+contexts, complete the dedicated metrics/runbook tool catalog, and write the
+ten-minute demonstration. Learning question: which evidence should be retained
+after cleanup so a reviewer can distinguish executed acceptance from design?
+
+## Previous verified checkpoint — T06, 2026-09-29
 
 **T06 is complete locally.** Correlated JSON logs, metrics, distributed traces,
 Grafana dashboards and six controlled scenarios run on the dedicated QEMU lab.

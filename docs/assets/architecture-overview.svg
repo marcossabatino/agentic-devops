@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="2560" height="1780" viewBox="0 0 2560 1780" role="img" aria-labelledby="title desc">
 <title id="title">Agentic DevOps — target architecture and execution workflow</title>
-<desc id="desc">A local operator submits a diagnosis to the API. PostgreSQL holds jobs and history. A leased worker uses a simulated model adapter and authenticated tools to inspect an orders simulator. Restarts require approval and deduplication. The target includes Kubernetes, observability, infrastructure automation and CI. Bedrock is a future M2 integration. T06 runs separate Kubernetes services with network isolation and correlated observability; CI and AWS remain planned.</desc>
+<desc id="desc">A local operator submits a diagnosis to the API. PostgreSQL holds jobs and history. A leased worker uses a simulated model adapter and authenticated tools to inspect an orders simulator. Restarts require approval and deduplication. The target includes Kubernetes, observability, infrastructure automation and CI. Bedrock is a future M2 integration. T07 runs isolated observable services and binds deployment to successful GitHub checks; AWS remains planned.</desc>
 <defs><marker id="arrow-teal" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0 10 5 0 10Z" fill="#007E78"/></marker><marker id="arrow-muted" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0 10 5 0 10Z" fill="#8796A5"/></marker></defs>
 <rect x="0" y="0" width="2560" height="1780" rx="0" fill="#FFFFFF"/>
 <rect x="0" y="0" width="16" height="1780" rx="0" fill="#007E78"/>
@@ -13,7 +13,7 @@
 <text x="2148" y="148" font-family="Open Sans, Arial, sans-serif" font-size="18" font-weight="400" fill="#5C6D80" text-anchor="start">Execution flow</text>
 <path d="M2310 141 H2354" fill="none" stroke="#7754B5" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="7 6"/>
 <text x="2370" y="148" font-family="Open Sans, Arial, sans-serif" font-size="18" font-weight="400" fill="#5C6D80" text-anchor="start">Future</text>
-<text x="2080" y="190" font-family="Open Sans, Arial, sans-serif" font-size="17" font-weight="400" fill="#5C6D80" text-anchor="start">Current implementation: T06 observable lab</text>
+<text x="2080" y="190" font-family="Open Sans, Arial, sans-serif" font-size="17" font-weight="400" fill="#5C6D80" text-anchor="start">Current implementation: T07 validated lab</text>
 <rect x="80" y="245" width="1930" height="1070" rx="22" fill="#F7F9FC" stroke="#CED9E3" stroke-width="2"/>
 <text x="110" y="286" font-family="Open Sans, Arial, sans-serif" font-size="17" font-weight="700" fill="#5C6D80" text-anchor="start" letter-spacing="2">LOCAL MACHINE</text>
 <rect x="370" y="310" width="1608" height="969" rx="16" fill="#FFFFFF" stroke="#AEBFCF" stroke-width="2"/>
@@ -233,14 +233,14 @@
 <text x="110" y="1550" font-family="Open Sans, Arial, sans-serif" font-size="18" font-weight="400" fill="#5C6D80" text-anchor="start">NetworkPolicy: deny by default, allow required paths. Application authorization remains a separate control.</text>
 <text x="80" y="1632" font-family="Open Sans, Arial, sans-serif" font-size="17" font-weight="700" fill="#5C6D80" text-anchor="start" letter-spacing="1.5">IMPLEMENTATION BOUNDARY</text>
 <rect x="80" y="1652" width="725" height="66" rx="10" fill="#EEF7F3"/>
-<text x="100" y="1678" font-family="Open Sans, Arial, sans-serif" font-size="15" font-weight="700" fill="#007E78" text-anchor="start">BUILT LOCALLY  /  T01–T06</text>
-<text x="100" y="1704" font-family="Open Sans, Arial, sans-serif" font-size="17" font-weight="400" fill="#172B42" text-anchor="start">Durable runs · Kubernetes · isolation · telemetry</text>
+<text x="100" y="1678" font-family="Open Sans, Arial, sans-serif" font-size="15" font-weight="700" fill="#007E78" text-anchor="start">DELIVERED  /  T01–T07</text>
+<text x="100" y="1704" font-family="Open Sans, Arial, sans-serif" font-size="17" font-weight="400" fill="#172B42" text-anchor="start">Durable runs · Kubernetes · isolation · telemetry · CI</text>
 <rect x="825" y="1652" width="905" height="66" rx="10" fill="#F2F5FA"/>
-<text x="845" y="1678" font-family="Open Sans, Arial, sans-serif" font-size="15" font-weight="700" fill="#3269B4" text-anchor="start">PLANNED  /  T07–T08</text>
-<text x="845" y="1704" font-family="Open Sans, Arial, sans-serif" font-size="17" font-weight="400" fill="#172B42" text-anchor="start">CI · full verification · scoped cleanup</text>
+<text x="845" y="1678" font-family="Open Sans, Arial, sans-serif" font-size="15" font-weight="700" fill="#3269B4" text-anchor="start">PLANNED  /  T08</text>
+<text x="845" y="1704" font-family="Open Sans, Arial, sans-serif" font-size="17" font-weight="400" fill="#172B42" text-anchor="start">Full verification · scoped cleanup · demonstration</text>
 <rect x="1750" y="1652" width="730" height="66" rx="10" fill="#FBF4E9"/>
 <text x="1770" y="1678" font-family="Open Sans, Arial, sans-serif" font-size="15" font-weight="700" fill="#B96914" text-anchor="start">CURRENT EFFECT BOUNDARY</text>
 <text x="1770" y="1704" font-family="Open Sans, Arial, sans-serif" font-size="17" font-weight="400" fill="#172B42" text-anchor="start">Orders commits the simulated effect and deduplication in PostgreSQL.</text>
-<text x="80" y="1755" font-family="Open Sans, Arial, sans-serif" font-size="17" font-weight="400" fill="#5C6D80" text-anchor="start">Separate workloads, restricted flows and observability are deployed. CI and real model inference remain planned.</text>
+<text x="80" y="1755" font-family="Open Sans, Arial, sans-serif" font-size="17" font-weight="400" fill="#5C6D80" text-anchor="start">Workloads, restricted flows, observability and CI provenance are delivered. Real model inference remains planned.</text>
 <text x="2480" y="1755" font-family="Open Sans, Arial, sans-serif" font-size="15" font-weight="600" fill="#5C6D80" text-anchor="end" letter-spacing="1">HLD 01  /  29 SEP 2026</text>
 </svg>
