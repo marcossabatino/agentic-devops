@@ -5,6 +5,7 @@ import json
 
 from app.contracts import RESTART_TOOL, Rejected
 from app.tools import DurableTools, validate_call
+from app import telemetry as tel
 
 
 class ToolGateway(DurableTools):
@@ -32,16 +33,23 @@ class ToolGateway(DurableTools):
                         raise Rejected('APPROVAL_ALREADY_USED', 409)
         # The effect owner validates again and atomically consumes approval. This
         # read-only gate cannot replace that transaction or create a valid approval.
+        with tel.span('orders.call', kind=tel.SpanKind.CLIENT, run_id=run_id, tool=tool) as current:
+            current.set_attribute('server.address', self.orders_host)
+            return self.forward(payload)
+
+    def forward(self, payload):
         connection = HTTPConnection(self.orders_host, self.port, timeout=self.timeout)
         try:
             connection.request('POST', '/tools/execute', json.dumps(payload), {
-                'Content-Type': 'application/json', 'Authorization': 'Bearer ' + self.orders_token})
+                **tel.carrier(), 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + self.orders_token})
             response = connection.getresponse()
             body = json.loads(response.read(65536))
             if response.status != 200:
                 raise Rejected(body.get('error', 'ORDERS_FAILED'), response.status)
             return body
-        except (TimeoutError, OSError):
+        except TimeoutError:
             raise Rejected('TOOL_TIMEOUT', 503) from None
+        except OSError:
+            raise Rejected('TOOL_UNAVAILABLE', 503) from None
         finally:
             connection.close()

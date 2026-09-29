@@ -37,8 +37,10 @@ spec:
           image: "{{ $.Values.image.repository }}:{{ $.Values.image.tag }}"
           imagePullPolicy: {{ $.Values.image.pullPolicy }}
           args: [{{ $name | quote }}]
-          ports: [{name: http, containerPort: 8080}]
+          ports: [{name: http, containerPort: 8080}, {name: metrics, containerPort: 9090}]
           env:
+            - {name: OTEL_SERVICE_NAME, value: {{ $name | quote }}}
+            - {name: OTEL_EXPORTER_OTLP_TRACES_ENDPOINT, value: 'http://collector.lab-observability.svc.cluster.local:4318/v1/traces'}
             - {name: ALLOWED_HOSTS, value: {{ $component.allowedHosts | quote }}}
             - {name: SOURCE_REVISION, value: {{ $.Values.sourceRevision | quote }}}
             - {name: TOOLS_HOST, value: tools.lab-tools.svc.cluster.local}
@@ -89,5 +91,5 @@ metadata:
 spec:
   type: ClusterIP
   selector: {app.kubernetes.io/name: {{ $name }}}
-  ports: [{name: http, port: 8080, targetPort: http}]
+  ports: [{name: http, port: 8080, targetPort: http}, {name: metrics, port: 9090, targetPort: metrics}]
 {{- end }}

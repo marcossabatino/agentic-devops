@@ -7,6 +7,7 @@ from psycopg.types.json import Jsonb
 from app.contracts import ARGUMENTS, READ_TOOL, RESTART_TOOL, Rejected, uuid_text
 from app.http_service import service_server
 from app.runtime import OrdersSimulator
+from app import telemetry as tel
 
 
 def validate_call(credentials, authorization, payload):
@@ -37,7 +38,7 @@ class DurableTools:
                 raise Rejected('RUN_NOT_FOUND', 404)
             if tool == READ_TOOL:
                 scenario = row['data']['scenario']
-                if scenario == 'tool-timeout':
+                if scenario in ('tool-timeout', 'deadline-exceeded'):
                     # Bounded delay, larger than the default client deadline.
                     sleep(0.75)
                     raise Rejected('TOOL_UNAVAILABLE', 503)
@@ -80,7 +81,10 @@ class DurableTools:
     def server(self, port=0, **transport):
         def dispatch(method, path, headers, payload):
             if method == 'POST' and path == '/tools/execute':
-                return 200, self.execute(headers.get('Authorization'), payload), 'application/json'
+                run_id, tool, _, _ = validate_call(self.credentials, headers.get('Authorization'), payload)
+                tel.enrich(run_id=run_id, tool=tool)
+                with tel.span('tool.execute', run_id=run_id, tool=tool):
+                    return 200, self.execute(headers.get('Authorization'), payload), 'application/json'
             if method == 'GET' and path == '/healthz':
                 with self.db.connect() as conn:
                     conn.execute('SELECT 1')

@@ -122,7 +122,7 @@ def deploy():
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('action', choices=['bootstrap', 'record-identity', 'guard', 'infra-init', 'infra-plan', 'infra-apply', 'deploy', 'ui'])
+    parser.add_argument('action', choices=['bootstrap', 'record-identity', 'guard', 'infra-init', 'infra-plan', 'infra-apply', 'deploy', 'ui', 'dashboards'])
     parser.add_argument("--port", type=int, default=8080)
     args = parser.parse_args()
     if args.action == 'bootstrap':
@@ -139,6 +139,8 @@ def main():
             command(['tofu', '-chdir=infra/local', 'apply', '-input=false', 'lab.tfplan'])
         elif args.action == 'deploy':
             deploy()
+        elif args.action == 'dashboards':
+            kubectl('-n', 'lab-observability', 'port-forward', '--address=127.0.0.1', 'service/grafana', f'{args.port}:3000')
         elif args.action == 'ui':
             kubectl('-n', 'lab-app', 'port-forward', '--address=127.0.0.1', 'service/api', f'{args.port}:8080')
 

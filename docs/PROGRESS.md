@@ -1,6 +1,100 @@
 # Progress
 
-## Last verified checkpoint — 2026-09-28
+## Last verified checkpoint — T06, 2026-09-29
+
+**T06 is complete locally.** Correlated JSON logs, metrics, distributed traces,
+Grafana dashboards and six controlled scenarios run on the dedicated QEMU lab.
+The user requested resuming and delivering the next task with progress updates.
+The pre-existing partial T06 implementation was completed and validated. The
+user subsequently authorized committing and pushing all pending work to
+`origin/main`; this checkpoint accompanies that publication.
+
+### Delivered
+
+- W3C context persisted with each job and propagated across API, worker, gateway
+  and orders HTTP boundaries. The UI and scenario commands expose the trace ID.
+  Spans cover publication, execution/claim, simulated model decisions, tool calls,
+  approval resumption, limits and persistence.
+- JSON logs correlate validated run/trace IDs, service, step, tool, duration,
+  status and error code. Prompt text, credentials, headers, DSNs and exception
+  messages are excluded. Connection failures and timeouts have distinct categories.
+- Prometheus endpoints on all four services; bounded metric labels for terminal
+  runs, correctness, duration, pending jobs, steps, tool failures, retries and
+  denials. Terminal totals derive from durable history to avoid double-counting.
+- OpenTofu-owned local Helm release for digest-pinned Collector, Prometheus,
+  Tempo and Grafana, with restricted pods, resource limits and internal Services.
+  Eleven telemetry paths have symmetric ingress/egress rules (22 new policies;
+  44 NetworkPolicies total). Application internet access remains denied.
+- Provisioned ten-panel Grafana dashboard with Prometheus/Tempo datasources and
+  localhost-only access via `make dashboards`. Anonymous access is Viewer only.
+- Authenticated scenario selection, a named total-deadline scenario,
+  `make scenario CASE=...`, `make reset`, `make logs RUN_ID=...` and
+  `make verify-observability`. Reset selects healthy and executes a healthy run,
+  preserving history. Restart still requires explicit approval.
+- [Observability guide](OBSERVABILITY_DEMO.md), [ADR 0005](decisions/0005-observability-and-controlled-failures.md),
+  updated README/HLD/task backlog and refreshed SVG/PNG implementation boundaries.
+
+### Executed evidence
+
+- `make verify-observability`: **90 checks passed**, including all six scenarios,
+  trace parent graphs, four-service correlation, orders dependency timeout spans,
+  three bounded timeout calls, five-step limit, total deadline, explicit approval
+  and one simulated effect. All four Prometheus targets, required metrics and ten
+  dashboard queries were verified through Grafana's actual datasource proxies.
+  Logs correlate to the run's trace; credentials and prompt text were absent.
+- `make verify-network`: **24 TCP checks passed**, including four application
+  exporters reaching Collector and denied unauthorized telemetry/metrics access.
+  Cluster DNS, host internet control, application egress denials and independent
+  HTTP authorization (401/401/200/403) passed. The temporary test pod was removed.
+- `make verify-durable`: **26 real PostgreSQL tests passed without skips**,
+  including new scenario scope/reset, named deadline and queue/HTTP trace
+  continuity/redaction tests. Existing approval/idempotency/recovery tests passed.
+- `make verify-cluster`: **23 checks passed**, including persistent history after
+  PostgreSQL pod replacement and the final OpenTofu **no-change** plan.
+- `make test`: **27 standard-library checks passed**; PostgreSQL tests remain
+  intentionally skipped here and are covered separately above. Helm lint,
+  OpenTofu formatting/validation, JavaScript syntax and whitespace checks passed.
+- Chromium loaded the dashboard with visible availability, outcome, latency and
+  correctness data and no JavaScript errors. The viewport screenshot and refreshed
+  architecture image were inspected. Full-page Grafana screenshots were replaced
+  with viewport capture because Grafana virtualizes off-screen panels.
+- The public scenario/healthy reset/log lookup commands passed against the
+  deployed application. The active scenario was left healthy.
+
+Evidence remains in ignored local files: `artifacts/t06-observability.json`,
+`t06-trace-*.json`, `t06-correlated-logs.json`, `t06-dashboard.png`,
+`t06-browser.json`, `t06-command-*.json*`, `t05-network.json`, `t03-durable.json`,
+`t04-cluster.json` and `t04-post-apply-plan.log`. The deployed image/source are in
+`data/platform/build.json`; the revision includes `-dirty` until committed.
+
+### Environment recovery and boundaries
+
+The VM was stopped at session start. On resume, Minikube rewrote the private
+kubeconfig endpoint without certificate data and retained the previous API port
+in profile metadata. Existing certificates were used with TLS verification;
+the recorded kube-system UID matched before repairing the private kubeconfig
+and synchronizing only the dedicated profile's API port. A private metadata
+backup was retained. No cluster was recreated, TLS was not disabled and unrelated
+contexts were not changed. A subsequent `make bootstrap` passed with
+**ok=8, changed=0**, recorded in `artifacts/t06-bootstrap-repaired.log`.
+
+Prometheus and Tempo storage is ephemeral (`emptyDir`); pod replacement can lose
+telemetry. Tempo retains one hour; Prometheus retains 24 hours or 256 MB.
+Application history remains in PostgreSQL. Logs use Kubernetes retention; no
+central log store is claimed. Export queues/timeouts are bounded and can drop
+telemetry during an outage. The database-backed metrics collector is for local
+lab scale. This delivery makes no CI, HA, production or real-model claim.
+
+The dedicated VM remains running. Use `make ui` / `make dashboards` for local
+access or `minikube stop -p agentic-devops` to stop compute. Validation forwards
+and browser processes were closed.
+
+Next: **T07 — CI and deployment provenance**. T08 retains consolidated acceptance,
+cleanup, demonstration and completion of the dedicated metrics/runbook tool
+catalog. Learning question: how will the running image prove that it contains
+exactly the commit validated by CI?
+
+## Previous verified checkpoint — 2026-09-28
 
 **T04 and T05 are complete locally.** The durable application now runs as separate
 services on the dedicated QEMU profile, with persistent PostgreSQL and verified

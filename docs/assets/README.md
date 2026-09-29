@@ -37,16 +37,16 @@ no scripts, remote fonts, or external image dependencies.
 Solid teal arrows and numbered badges describe the execution flow. Connections
 show the initiating component; responses travel back over the same connection.
 The purple dashed panel identifies future AWS integration. Namespace outlines
-describe the deployed application boundaries. Observability and M2 remain planned.
+describe the deployed application boundaries. Observability is deployed; M2 remains planned.
 
 The delivery strip is a setup/deployment workflow, not a dependency called by
 every diagnosis. The observability strip describes cross-cutting capabilities;
 it is not a detailed telemetry routing diagram. The human gate is an annotation
 on the API approval flow, not an additional service.
 
-T04/T05 run separate Kubernetes workloads with restricted network paths. The
+T04–T06 run separate Kubernetes workloads with restricted network paths and telemetry. The
 orders service owns the PostgreSQL transaction containing its simulated effect
-and deduplication. Observability releases and Bedrock remain future work. See the [HLD](../HIGH_LEVEL_DESIGN.md) for detailed flows.
+and deduplication. Observability releases are deployed; Bedrock remains future work. See the [HLD](../HIGH_LEVEL_DESIGN.md) for detailed flows.
 
 Visual direction follows the user-supplied
 [AWS workflow reference](https://d2908q01vomqb2.cloudfront.net/fc074d501302eb2b93e2554793fcaf50b3bf7291/2022/07/25/The-components-of-the-solution-and-the-steps-in-the-workflow.jpg):

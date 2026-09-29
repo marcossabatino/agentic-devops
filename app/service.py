@@ -18,6 +18,7 @@ from app.gateway import ToolGateway
 from app.http_service import service_server
 from app.tools import DurableTools
 from app.worker import ToolClient, Worker
+from app import telemetry as tel
 
 
 def database_dsn(config, role):
@@ -49,10 +50,11 @@ def main():
         return
     role = args.component
     db = Database(database_dsn(config, role))
+    metrics_server, metrics_thread = tel.configure(db if role == 'api' else None)
     transport = {'bind_address': '0.0.0.0',
                  'allowed_hosts': tuple(os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(','))}
     if role == 'api':
-        auth = Credentials({'lab-user': {'token': config['user_token'], 'scopes': ['runs:create', 'runs:read', 'runs:approve']}})
+        auth = Credentials({'lab-user': {'token': config['user_token'], 'scopes': ['runs:create', 'runs:read', 'runs:approve', 'runs:configure']}})
         server = durable_server(db, auth, os.environ.get('SOURCE_REVISION', 'unknown'), 8080, **transport)
     elif role == 'tools':
         auth = Credentials({'agent-worker': {'token': config['worker_token'], 'scopes': ['tools:read', 'tools:restart']}})
@@ -84,6 +86,10 @@ def main():
         server.shutdown()
         server.server_close()
         thread.join(timeout=5)
+        metrics_server.shutdown()
+        metrics_server.server_close()
+        metrics_thread.join(timeout=5)
+        tel.PROVIDER.shutdown()
 
 
 if __name__ == '__main__':

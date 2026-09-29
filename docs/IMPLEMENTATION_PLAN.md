@@ -11,9 +11,9 @@ Work through one guided learning increment at a time. Before an important archit
 | T03 — Durable execution and tool contracts | Complete locally | PostgreSQL claims/leases, fenced writes, durable limits, HTTP service authentication, approval binding, and transactional simulated idempotency. 23 real-database tests passed, including the T04 separate effect owner. Distributed trace evidence for A05 remains T06. | A05 local behavior, A07 application scope, A08, A09, A10 |
 | T04 — Reproducible local platform | Complete locally | Dedicated QEMU/Kubernetes 1.34.12 + Calico 3.30.3, Ansible repeat with changed=0, OpenTofu platform, Helm workloads, persistent PostgreSQL and localhost UI. Deployed scenarios and zero-change post-apply plan passed. | A01, A02, A03 |
 | T05 — Network isolation | Complete locally | 22 NetworkPolicies: default-deny, cluster DNS, seven symmetric service paths. Bounded positive/negative tests and HTTP authorization over an allowed path. Telemetry-specific paths accompany T06 workloads. | A06, A07 |
-| T06 — Observability and controlled failures | Pending | Correlated JSON logs, metrics, traces, dashboards, scenario/reset commands, and deadline/step-limit evidence. | A05, A10, A11 |
+| T06 — Observability and controlled failures | Complete locally | Collector/Prometheus/Tempo/Grafana deployed; 90 observability checks, six scenarios, 24 network connections and 26 PostgreSQL tests passed. Correlated logs/traces, bounded metrics, dashboard and scenario/reset commands verified. | A05, A10, A11 |
 | T07 — CI and deployment provenance | Pending | GitHub checks and image builds; intentional failure evidence; local deployment identifies the validated commit. | A12 |
-| T08 — Verification, cleanup, and demonstration | Pending | `make verify` report, scoped cleanup with profile/context checks, and a ten-minute demonstration guide. | A01–A13 |
+| T08 — Verification, cleanup, and demonstration | Pending | `make verify` report, remaining metrics/runbook tool catalog, scoped cleanup with profile/context checks, and a ten-minute demonstration guide. | A01–A13 |
 | T09 — AWS integration | Deferred to M2 | Define account, region/model, budget, temporary credentials, connector egress, separate state, and OIDC scope before implementation. | A14 |
 
 The ordering follows PRD section 13. Individual tasks may span multiple 60–90-minute learning sessions. M3 extensions remain optional and outside the current increment.
@@ -22,18 +22,17 @@ The ordering follows PRD section 13. Individual tasks may span multiple 60–90-
 
 The user selected QEMU for the dedicated `agentic-devops` profile. [ADR 0001](decisions/0001-qemu-lab-profile.md) records the choice, network limitations, and version-selection evidence. The existing `minikube` profile remains untouched.
 
-T01–T05 have local execution evidence in [Progress](PROGRESS.md). The deployed
-platform now has separate services, persistent storage, restricted pod settings,
-repeatable bootstrap, stable OpenTofu state, and tested network isolation. The
-standalone T02/T03 demos remain available.
+T01–T06 have local execution evidence in [Progress](PROGRESS.md). The deployed
+platform includes separate services, persistent application storage, stable
+OpenTofu state, tested network isolation and correlated observability. Standalone
+T02/T03 demos remain available. [T06 guide](OBSERVABILITY_DEMO.md) describes the
+six scenarios, dashboard, log/trace lookup, reset and ephemeral telemetry limits.
 
-Next is **T06 — Observability and controlled failures**: correlated JSON logs,
-metrics and traces, Collector/Prometheus/Tempo/Grafana releases owned by OpenTofu,
-dashboards, and scenario/reset commands. Add exact telemetry policies with their
-workloads; `lab-observability` is currently empty and denied by default. A05's
-trace evidence and A11 remain pending. Dedicated metrics/runbook tools from the
-PRD catalog also remain to be assigned and implemented before M1 closes.
+Next is **T07 — CI and deployment provenance**: GitHub checks and image builds,
+intentional failure evidence, and local deployment of an identifiable validated
+commit. Publishing workflows and remote execution belong to that increment.
+Full acceptance/cleanup and the dedicated metrics/runbook tools are assigned to
+T08 before M1 closes. AWS remains deferred to M2.
 
-Learning question: when a tool call fails, how will you distinguish a denied
-network path, a rejected identity, an application error, and a dependency timeout
-using the run's logs, metrics, and trace?
+Learning question: how will you prove that the image running locally corresponds
+to the exact commit that passed GitHub checks, especially with a dirty worktree?

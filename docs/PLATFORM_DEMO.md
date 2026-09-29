@@ -39,7 +39,7 @@ cluster identity. The shared/default kubeconfig is not required for lab access.
 | `lab-app` | Interface/API and worker Deployments |
 | `lab-tools` | Tool gateway and separate orders simulator Deployments |
 | `lab-data` | PostgreSQL StatefulSet, persistent claim, migration Job |
-| `lab-observability` | Reserved namespace and baseline controls; telemetry workloads are T06 |
+| `lab-observability` | Collector, Prometheus, Tempo, Grafana and restricted telemetry paths (T06) |
 
 OpenTofu owns namespaces, quota/limit controls, observer RBAC, and NetworkPolicies.
 Helm owns application resources. A local credential injector owns Secret values;
@@ -113,6 +113,5 @@ belong to OpenTofu's resource ownership.
 - The source revision may include `-dirty` until the code is committed. T07 will
   add GitHub CI provenance; a local image build is not evidence of passing CI.
 
-The next implementation task is T06: instrument the existing execution with
-correlated logs, metrics and traces, deploy the observability releases, and add
-only their necessary network flows.
+T06 adds [observability and controlled failures](OBSERVABILITY_DEMO.md).
+The next implementation task is T07: GitHub CI and deployment provenance.

@@ -10,6 +10,7 @@ import psycopg
 
 from app.contracts import ARGUMENTS, READ_TOOL, RESTART_TOOL, Rejected
 from app.runtime import SimulatedAdapter
+from app import telemetry as tel
 
 
 class ToolClient:
@@ -22,7 +23,7 @@ class ToolClient:
             connection.request('POST', '/tools/execute', json.dumps({
                 'run_id': str(run_id), 'tool': tool, 'arguments': ARGUMENTS,
                 'idempotency_key': f'{run_id}:{tool}',
-            }), {'Content-Type': 'application/json', 'Authorization': 'Bearer ' + self.token})
+            }), {**tel.carrier(), 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + self.token})
             response = connection.getresponse()
             body = json.loads(response.read(65536))
             if response.status != 200:
@@ -40,9 +41,19 @@ class Worker:
         job = self.db.claim()
         if not job:
             return False
+        with tel.span('job.execute', parent=job['data'].get('trace_context'), kind=tel.SpanKind.CONSUMER,
+                      run_id=str(job['run_id'])):
+            with tel.span('job.claim') as current:
+                current.set_attribute('lab.attempt', job['attempts'])
+            self.process(job)
+        return True
+
+    def process(self, job):
         try:
             self.execute(job)
         except Rejected as exc:
+            tel.enrich(status='failed', error_code=exc.code)
+            tel.trace.get_current_span().set_status(tel.Status(tel.StatusCode.ERROR, exc.code))
             if exc.code != 'LEASE_LOST':
                 try:
                     self.db.finish(job, 'failed', error=exc.code,
@@ -54,6 +65,8 @@ class Worker:
             # Leave the claim recoverable if the database becomes unavailable.
             raise
         except Exception:
+            tel.enrich(status='failed', error_code='EXECUTION_FAILED')
+            tel.trace.get_current_span().set_status(tel.Status(tel.StatusCode.ERROR, 'EXECUTION_FAILED'))
             try:
                 self.db.finish(job, 'failed', error='EXECUTION_FAILED',
                                summary='The simulated diagnosis could not complete.')
@@ -64,9 +77,11 @@ class Worker:
     def execute(self, job):
         data = job['data']
         restart = 'approval_id' in data
-        tool = RESTART_TOOL if restart else READ_TOOL
         retries = 0
         while True:
+            with tel.span('model.decide') as current:
+                current.set_attribute('lab.model.mode', 'SIMULATED')
+                tool = RESTART_TOOL if restart else READ_TOOL
             number = self.db.reserve_step(job, tool, ARGUMENTS)
             remaining = (job['deadline'] - datetime.now(timezone.utc)).total_seconds()
             if remaining <= 0:
@@ -75,20 +90,28 @@ class Worker:
             step = dict(step=number, tool=tool, arguments=ARGUMENTS, result=None)
             failure = None
             try:
-                result = self.client.call(job['run_id'], tool,
-                                          min(self.db.policy.dependency_timeout, remaining))
+                with tel.span('tools.call', kind=tel.SpanKind.CLIENT, step=number, tool=tool) as current:
+                    current.set_attribute('server.address', self.client.host)
+                    result = self.client.call(job['run_id'], tool,
+                                              min(self.db.policy.dependency_timeout, remaining))
                 step.update(status='completed', result=result)
-            except (TimeoutError, OSError):
+            except TimeoutError:
                 failure = Rejected('TOOL_TIMEOUT', 503)
+            except OSError:
+                failure = Rejected('TOOL_UNAVAILABLE', 503)
             except Rejected as exc:
                 failure = exc
             if failure:
                 step.update(status='failed', error=failure.code)
             step['duration_ms'] = round((monotonic() - started) * 1000, 3)
+            tel.CALLS.labels(tool, step['status'], tel.error_code(failure) if failure else 'NONE').inc()
+            tel.LATENCY.labels(tool).observe(step['duration_ms'] / 1000)
+            tel.enrich(step=number, tool=tool)
             self.db.record_step(job, step)
             if failure:
                 if failure.status >= 500 and retries < self.db.policy.retries:
                     sleep(min(0.05 * 2 ** retries + random.uniform(0, 0.02), 0.3))
+                    tel.RETRIES.labels(tool, tel.error_code(failure)).inc()
                     retries += 1
                     continue
                 raise failure
@@ -99,7 +122,8 @@ class Worker:
                                pending_approval={'tool': RESTART_TOOL, 'arguments': ARGUMENTS},
                                summary='Orders is degraded. A simulated restart needs your approval.')
                 return
-            outcome, summary = SimulatedAdapter().summarize(result)
+            with tel.span('model.summarize'):
+                outcome, summary = SimulatedAdapter().summarize(result)
             if restart:
                 summary = 'The approved simulated restart completed. Orders is healthy.'
             self.db.finish(job, 'completed', outcome=outcome, summary=summary)

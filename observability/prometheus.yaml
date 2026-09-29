@@ -1,0 +1,17 @@
+global:
+  scrape_interval: 5s
+  evaluation_interval: 5s
+scrape_configs:
+  - job_name: lab
+    static_configs:
+      - targets: ['api.lab-app.svc.cluster.local:9090']
+        labels: {service: api}
+      - targets: ['worker.lab-app.svc.cluster.local:9090']
+        labels: {service: worker}
+      - targets: ['tools.lab-tools.svc.cluster.local:9090']
+        labels: {service: tools}
+      - targets: ['orders.lab-tools.svc.cluster.local:9090']
+        labels: {service: orders}
+  - job_name: prometheus
+    static_configs:
+      - targets: ['localhost:9090']

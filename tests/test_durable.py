@@ -303,6 +303,58 @@ time.sleep(30)
         self.assertEqual(result['step_count'], 5)
         self.assertEqual(len(result['steps']), 5)
 
+    def test_scenario_selection_requires_scope_and_preserves_existing_runs(self):
+        run = self.create()
+        path = '/api/scenario'
+        self.assertEqual(self.http(self.api_server, path, {'scenario': 'tool-timeout'})[0], 401)
+        self.assertEqual(self.http(self.api_server, path, {'scenario': 'tool-timeout'}, self.config['worker_token'])[0], 403)
+        self.assertEqual(self.http(self.api_server, path, {'scenario': 'unknown'}, self.config['user_token'])[0], 400)
+        for scenario in ('tool-timeout', 'healthy'):
+            self.assertEqual(self.http(self.api_server, path, {'scenario': scenario}, self.config['user_token'])[0], 200)
+            self.assertEqual(self.http(self.api_server, '/api/info')[1]['active_scenario'], scenario)
+        self.assertEqual(self.api_db.get(run['run_id'])['scenario'], 'healthy')
+
+    def test_named_deadline_scenario_terminates(self):
+        run = self.create('deadline-exceeded')
+        self.worker.once()
+        time.sleep(0.25)
+        self.worker.once()
+        result = self.api_db.get(run['run_id'])
+        self.assertEqual((result['status'], result['error']), ('failed', 'DEADLINE_EXCEEDED'))
+        self.assertLessEqual(result['step_count'], 1)
+        time.sleep(0.8)
+
+    def test_trace_survives_queue_and_http_without_sensitive_content(self):
+        from contextlib import redirect_stdout
+        from io import StringIO
+        from opentelemetry.sdk.trace.export import SimpleSpanProcessor
+        from opentelemetry.sdk.trace.export.in_memory_span_exporter import InMemorySpanExporter
+        from app import telemetry as tel
+        exporter = InMemorySpanExporter()
+        tel.PROVIDER.add_span_processor(SimpleSpanProcessor(exporter))
+        output = StringIO()
+        question = 'private-prompt-marker-do-not-export'
+        try:
+            with redirect_stdout(output):
+                status, run = self.http(self.api_server, '/api/runs',
+                                        {'question': question, 'scenario': 'healthy'}, self.config['user_token'])
+                self.assertEqual(status, 202)
+                self.worker.once()
+            spans = exporter.get_finished_spans()
+            self.assertTrue(spans)
+            self.assertEqual({format(s.context.trace_id, '032x') for s in spans}, {run['trace_id']})
+            self.assertTrue({'job.publish', 'job.execute', 'model.decide', 'tools.call',
+                             'tool.execute', 'step.persist', 'job.persist'} <= {s.name for s in spans})
+            span_ids = {s.context.span_id for s in spans}
+            self.assertTrue(all(s.parent is None or s.parent.span_id in span_ids for s in spans))
+            serialized = output.getvalue() + ''.join(s.to_json() for s in spans)
+            for secret in (question, self.config['user_token'], self.config['worker_token'], self.dsns['api']):
+                self.assertNotIn(secret, serialized)
+            records = [json.loads(line) for line in output.getvalue().splitlines()]
+            self.assertTrue(all(r['trace_id'] == run['trace_id'] for r in records))
+        finally:
+            exporter.clear()
+
     def test_deadline_and_exhausted_claims_become_terminal(self):
         run = self.create()
         self.sql("UPDATE jobs SET deadline = clock_timestamp() - interval '1 second'")

@@ -16,7 +16,7 @@ from scripts.local_database import local_database
 
 def credentials(config):
     return Credentials({
-        'lab-user': {'token': config['user_token'], 'scopes': ['runs:create', 'runs:read', 'runs:approve']},
+        'lab-user': {'token': config['user_token'], 'scopes': ['runs:create', 'runs:read', 'runs:approve', 'runs:configure']},
         'agent-worker': {'token': config['worker_token'], 'scopes': ['tools:read', 'tools:restart']},
     })
 

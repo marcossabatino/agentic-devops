@@ -43,7 +43,8 @@ def verify():
     try:
         endpoints = {}
         for namespace, component in [('lab-app', 'api'), ('lab-app', 'worker'),
-                                     ('lab-tools', 'tools'), ('lab-tools', 'orders'), ('lab-data', 'postgres')]:
+                                     ('lab-tools', 'tools'), ('lab-tools', 'orders'), ('lab-data', 'postgres'),
+                                     ('lab-observability', 'collector'), ('lab-observability', 'tempo')]:
             svc = json.loads(kubectl('-n', namespace, 'get', 'service', component, '-o', 'json', capture=True).stdout)
             pods = json.loads(kubectl('-n', namespace, 'get', 'pods', '-l', 'app.kubernetes.io/name=' + component,
                                      '-o', 'json', capture=True).stdout)['items']
@@ -72,7 +73,11 @@ def verify():
                  ('worker', 'tools', 8080, True), ('tools', 'orders', 8080, True),
                  ('api', 'orders', 8080, False), ('worker', 'orders', 8080, False),
                  ('api', 'tools', 8080, False), ('unauthorized', 'postgres', 5432, False),
-                 ('unauthorized', 'tools', 8080, False), ('unauthorized', 'api', 8080, False)]
+                 ('unauthorized', 'tools', 8080, False), ('unauthorized', 'api', 8080, False),
+                 ('api', 'collector', 4318, True), ('worker', 'collector', 4318, True),
+                 ('tools', 'collector', 4318, True), ('orders', 'collector', 4318, True),
+                 ('unauthorized', 'collector', 4318, False), ('unauthorized', 'api', 9090, False),
+                 ('worker', 'tools', 9090, False), ('api', 'tempo', 3200, False)]
         for source, target, port, allowed in cases:
             origin = endpoints[source]
             result = tcp(origin['namespace'], origin['pod'], endpoints[target]['ip'], port)

@@ -4,7 +4,7 @@ from dataclasses import dataclass
 import hmac
 from uuid import UUID
 
-SCENARIOS = ('healthy', 'orders-errors', 'restart-required', 'tool-timeout', 'step-limit')
+SCENARIOS = ('healthy', 'orders-errors', 'restart-required', 'tool-timeout', 'step-limit', 'deadline-exceeded')
 READ_TOOL = 'read_orders_health'
 RESTART_TOOL = 'restart_orders'
 ARGUMENTS = {'service': 'orders'}

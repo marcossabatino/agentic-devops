@@ -1,0 +1,39 @@
+images: {}
+configs: {}
+dashboard: '{}'
+components:
+  collector:
+    user: 10001
+    port: 4318
+    ports: [{name: otlp-http, port: 4318}, {name: health, port: 13133}]
+    args: ['--config=/etc/lab/config.yaml']
+    readiness: {path: '/', port: 13133}
+    resources:
+      requests: {cpu: 50m, memory: 64Mi}
+      limits: {cpu: 300m, memory: 192Mi}
+  prometheus:
+    user: 65534
+    port: 9090
+    ports: [{name: http, port: 9090}]
+    args: ['--config.file=/etc/lab/config.yaml', '--storage.tsdb.path=/var/lib/lab', '--storage.tsdb.retention.time=24h', '--storage.tsdb.retention.size=256MB', '--web.listen-address=0.0.0.0:9090']
+    readiness: {path: '/-/ready', port: 9090}
+    resources:
+      requests: {cpu: 100m, memory: 128Mi}
+      limits: {cpu: 500m, memory: 384Mi}
+  tempo:
+    user: 10001
+    port: 3200
+    ports: [{name: http, port: 3200}, {name: otlp-grpc, port: 4317}]
+    args: ['-config.file=/etc/lab/config.yaml']
+    readiness: {path: '/ready', port: 3200}
+    resources:
+      requests: {cpu: 100m, memory: 192Mi}
+      limits: {cpu: 500m, memory: 512Mi}
+  grafana:
+    user: 472
+    port: 3000
+    ports: [{name: http, port: 3000}]
+    readiness: {path: '/api/health', port: 3000}
+    resources:
+      requests: {cpu: 100m, memory: 128Mi}
+      limits: {cpu: 500m, memory: 384Mi}

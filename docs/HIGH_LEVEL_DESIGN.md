@@ -1,11 +1,11 @@
 # High-level design — Agentic DevOps Platform Lab
 
-Date: 2026-09-28. Design baseline: [PRD v0.2](prd.md).
+Date: 2026-09-29. Design baseline: [PRD v0.2](prd.md).
 
 This document describes the complete intended solution and distinguishes it from
-the implemented T05 checkpoint. **The diagrams include the complete target**.
+the implemented T06 checkpoint. **The diagrams include the complete target**.
 Kubernetes application deployment and network isolation are verified; distributed
-observability, CI, and AWS remain future work.
+observability is deployed by T06; CI and AWS remain future work.
 
 ![Architecture overview: numbered execution flow, deployment boundaries, observability, and future Bedrock integration](assets/architecture-overview.svg)
 
@@ -185,7 +185,7 @@ flows. The API may access its database records. The worker may access jobs, the
 adapter, and tools. Only the tool service may invoke the orders simulator.
 Required DNS and application paths are explicitly allowed, with matching ingress
 and egress. T05 tested allowed and forbidden paths plus workload internet denial.
-Telemetry paths will be added with their T06 workloads.
+T06 adds eleven explicit telemetry paths with symmetric ingress/egress policies.
 
 Separate database roles and tool scopes enforce application permissions even
 when a connection is allowed. The worker cannot grant itself human approval.
@@ -249,17 +249,18 @@ flowchart LR
     U -->|"Inspect correlated logs"| LOG
 ```
 
-Start with the run ID displayed in the interface. The target telemetry connects
+Start with the run ID displayed in the interface. The deployed telemetry connects
 that execution to its trace and structured logs. A trace shows where time was
 spent: queue handling, model interaction, tool calls, or persistence. Dashboards
 show aggregate success/failure, duration, pending jobs, retries, and denials.
 
-Run IDs and questions do not become Prometheus labels. They belong in execution
-records, logs, and trace context. The current design does not select an additional
+Run IDs and questions do not become Prometheus labels. Run IDs correlate logs
+and traces; questions remain only in authenticated execution history. The current design does not select an additional
 central log-storage product; container logs provide the initial log evidence.
 
-T03 already exposes persisted execution events. Collector, Prometheus, Tempo,
-Grafana, and distributed correlation remain T06 deliverables.
+T03 exposes persisted execution events. T06 adds Collector, Prometheus, Tempo,
+Grafana and distributed correlation. See the [observability guide](OBSERVABILITY_DEMO.md)
+for commands and the limits of ephemeral telemetry retention.
 
 ## 7. What changes with AWS in M2
 
@@ -285,15 +286,15 @@ to AWS is a separate architecture exercise, not an implied M2 requirement.
 
 ## 8. Current implementation versus complete solution
 
-| Capability | Now: T01–T05 | Remaining work |
+| Capability | Now: T01–T06 | Remaining work |
 | --- | --- | --- |
-| Local diagnosis UI and synthetic health evidence | Implemented locally and deployed in Kubernetes | Telemetry navigation |
+| Local diagnosis UI and synthetic health evidence | Implemented locally and deployed in Kubernetes, with trace ID in the UI | Continued usability improvements |
 | Durable jobs, recovery, authentication, approval, deduplication | Tested with real PostgreSQL, HTTP and deployed services | Continued regression coverage |
 | Component isolation | Separate API, worker, tool gateway, orders and PostgreSQL workloads | Adapter remains in the worker; a separate model service is not needed for M1 |
 | Dedicated cluster and repeatable deployment | QEMU/Calico, second bootstrap changed=0, OpenTofu no-change plan, Helm and persistent volume verified | Full cleanup and backup workflow remain later scope |
-| Network isolation | Default-deny, DNS, seven explicit service paths, positive and negative TCP tests | Add exact telemetry flows with T06 workloads |
-| Failure evidence | Timeout, step-limit, expiry, recovery and deployed scenario tests | T06 correlated telemetry and scenario/reset commands |
-| Metrics and runbook tools | Not implemented as dedicated tools | Complete the PRD catalog before M1 closes |
+| Network isolation | Default-deny, DNS, seven application and eleven telemetry paths; positive and negative TCP tests | Continued regression coverage |
+| Failure evidence | Correlated logs/traces, metrics/dashboard, timeout, step limit, deadline, scenario/reset and recovery tests | Consolidated M1 verification |
+| Metrics and runbook tools | Not implemented as dedicated tools | Complete the PRD catalog in T08 before M1 closes |
 | CI and deployment provenance | Local source revision and image content tag recorded | T07 GitHub checks/builds and validated deployment |
 | Complete acceptance and cleanup | Local, cluster and network test/report commands | T08 consolidated verification, scoped cleanup, ten-minute demonstration |
 | Real model inference | No LLM calls | M2 / T09 Bedrock integration |

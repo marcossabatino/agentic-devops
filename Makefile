@@ -45,3 +45,22 @@ verify-cluster:
 .PHONY: verify-network
 verify-network:
 	@python3 -B -m scripts.verify_network
+
+.PHONY: dashboards scenario reset logs verify-observability
+DASHBOARD_PORT ?= 3000
+CASE ?= healthy
+
+dashboards:
+	@python3 -B -m scripts.lab_platform dashboards --port $(DASHBOARD_PORT)
+
+scenario:
+	@python3 -B -m scripts.scenario --case $(CASE)
+
+reset:
+	@python3 -B -m scripts.scenario --case healthy
+
+logs:
+	@python3 -B -m scripts.scenario --logs $(RUN_ID)
+
+verify-observability:
+	@python3 -B -m scripts.verify_observability

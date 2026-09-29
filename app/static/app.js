@@ -14,6 +14,7 @@ function showRun(run) {
   setText('started', run.started_at);
   setText('run-id', run.run_id);
   setText('revision', run.revision);
+  setText('trace-id', run.trace_id ?? 'Not available in this mode');
   setText('raw-result', JSON.stringify(run, null, 2));
   const steps = document.querySelector('#steps');
   steps.replaceChildren();
@@ -103,7 +104,7 @@ fetch('/api/info')
       : 'In-memory history: latest 100 runs · Restarting the app clears history.');
     const names = { healthy: 'Healthy service', 'orders-errors': 'Service returning errors',
       'restart-required': 'Service needs a simulated restart', 'tool-timeout': 'Tool unavailable / timeout',
-      'step-limit': 'Repeated tool requests / step limit' };
+      'step-limit': 'Repeated tool requests / step limit', 'deadline-exceeded': 'Total deadline exceeded' };
     const select = document.querySelector('#scenario');
     select.replaceChildren(...info.scenarios.map((scenario) => {
       const option = document.createElement('option');
@@ -111,5 +112,6 @@ fetch('/api/info')
       option.textContent = names[scenario] ?? scenario;
       return option;
     }));
+    select.value = info.active_scenario ?? 'healthy';
   })
   .catch(() => setText('build-info', 'Build information unavailable.'));

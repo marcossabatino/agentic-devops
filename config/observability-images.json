@@ -1,0 +1,6 @@
+{
+  "collector": "otel/opentelemetry-collector@sha256:56951db9579bf00d3f32a4e934e19548183a86c14640798502bcd4c225976ea6",
+  "prometheus": "prom/prometheus@sha256:38c3b05c3bc744ff1b0b7b4eb82196026442845e62a1e2073795565da506d7a2",
+  "tempo": "grafana/tempo@sha256:65a5789759435f1ef696f1953258b9bbdb18eb571d5ce711ff812d2e128288a4",
+  "grafana": "grafana/grafana@sha256:35c41e0fd0295f5d0ee5db7e780cf33506abfaf47686196f825364889dee878b"
+}

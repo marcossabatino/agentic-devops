@@ -95,7 +95,7 @@ def build():
     parts.clear()
     add(f'<svg xmlns="http://www.w3.org/2000/svg" width="{WIDTH}" height="{HEIGHT}" viewBox="0 0 {WIDTH} {HEIGHT}" role="img" aria-labelledby="title desc">')
     add('<title id="title">Agentic DevOps — target architecture and execution workflow</title>')
-    add('<desc id="desc">A local operator submits a diagnosis to the API. PostgreSQL holds jobs and history. A leased worker uses a simulated model adapter and authenticated tools to inspect an orders simulator. Restarts require approval and deduplication. The target includes Kubernetes, observability, infrastructure automation and CI. Bedrock is a future M2 integration. T05 runs separate Kubernetes services with network isolation; observability and AWS remain planned.</desc>')
+    add('<desc id="desc">A local operator submits a diagnosis to the API. PostgreSQL holds jobs and history. A leased worker uses a simulated model adapter and authenticated tools to inspect an orders simulator. Restarts require approval and deduplication. The target includes Kubernetes, observability, infrastructure automation and CI. Bedrock is a future M2 integration. T06 runs separate Kubernetes services with network isolation and correlated observability; CI and AWS remain planned.</desc>')
     add('<defs><marker id="arrow-teal" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0 10 5 0 10Z" fill="#007E78"/></marker><marker id="arrow-muted" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0 10 5 0 10Z" fill="#8796A5"/></marker></defs>')
     rect(0, 0, WIDTH, HEIGHT, '#FFFFFF', radius=0)
     rect(0, 0, 16, HEIGHT, TEAL, radius=0)
@@ -110,7 +110,7 @@ def build():
     text(2148, 148, 'Execution flow', 18, MUTED)
     path('M2310 141 H2354', PURPLE, 3, dash='7 6')
     text(2370, 148, 'Future', 18, MUTED)
-    text(2080, 190, 'Current implementation: T05 Kubernetes lab', 17, MUTED)
+    text(2080, 190, 'Current implementation: T06 observable lab', 17, MUTED)
 
     # Local machine boundary and nested Kubernetes namespaces.
     rect(80, 245, 1930, 1070, '#F7F9FC', LINE, 22)
@@ -252,16 +252,16 @@ def build():
     # Status footer prevents a target-state diagram from claiming completed deployment.
     text(80, 1632, 'IMPLEMENTATION BOUNDARY', 17, MUTED, 700, spacing=1.5)
     rect(80, 1652, 725, 66, '#EEF7F3', radius=10)
-    text(100, 1678, 'BUILT LOCALLY  /  T01–T05', 15, TEAL, 700)
-    text(100, 1704, 'Durable runs · Kubernetes · approval · network isolation', 17, INK)
+    text(100, 1678, 'BUILT LOCALLY  /  T01–T06', 15, TEAL, 700)
+    text(100, 1704, 'Durable runs · Kubernetes · isolation · telemetry', 17, INK)
     rect(825, 1652, 905, 66, '#F2F5FA', radius=10)
-    text(845, 1678, 'PLANNED  /  T06–T08', 15, BLUE, 700)
-    text(845, 1704, 'Correlated telemetry · dashboards · CI · full verification · scoped cleanup', 17, INK)
+    text(845, 1678, 'PLANNED  /  T07–T08', 15, BLUE, 700)
+    text(845, 1704, 'CI · full verification · scoped cleanup', 17, INK)
     rect(1750, 1652, 730, 66, '#FBF4E9', radius=10)
     text(1770, 1678, 'CURRENT EFFECT BOUNDARY', 15, AMBER, 700)
     text(1770, 1704, 'Orders commits the simulated effect and deduplication in PostgreSQL.', 17, INK)
-    text(80, 1755, 'Separate workloads and restricted flows are deployed. Observability and real model inference remain planned.', 17, MUTED)
-    text(2480, 1755, 'HLD 01  /  28 SEP 2026', 15, MUTED, 600, 'end', 1)
+    text(80, 1755, 'Separate workloads, restricted flows and observability are deployed. CI and real model inference remain planned.', 17, MUTED)
+    text(2480, 1755, 'HLD 01  /  29 SEP 2026', 15, MUTED, 600, 'end', 1)
     add('</svg>')
     return '\n'.join(parts) + '\n'
 

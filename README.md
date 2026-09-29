@@ -11,11 +11,11 @@ verify that unauthorized connections and actions are rejected.
 
 ## Current status
 
-**T01–T05 are implemented and verified locally:** the durable simulated diagnosis
+**T01–T06 are implemented and verified locally:** the durable simulated diagnosis
 application runs in a dedicated QEMU/Calico Kubernetes cluster. Ansible bootstrap,
 OpenTofu platform resources, Helm deployment, persistent storage, and network
-isolation have executed acceptance evidence. Distributed observability and CI
-remain the next increments.
+isolation have executed acceptance evidence. Correlated logs, metrics, traces,
+Grafana dashboards and controlled failures are deployed. CI is the next increment.
 
 The platform includes separate API, worker, tool gateway and orders workloads;
 authenticated tools; approval-bound simulated restart; durable recovery and
@@ -33,6 +33,7 @@ make infra-apply
 make deploy
 make verify-cluster
 make verify-network
+make verify-observability
 make ui
 ```
 
@@ -41,6 +42,22 @@ from the private `data/platform/credentials.json` file. Read the
 [platform demonstration](docs/PLATFORM_DEMO.md) for prerequisites, ownership,
 credentials, verification, and stopping the dedicated VM. All platform commands
 use a private kubeconfig and explicit lab context; unrelated profiles are preserved.
+
+## Inspect observability and controlled failures
+
+```sh
+make dashboards
+# In another terminal:
+make scenario CASE=tool-timeout
+make logs RUN_ID=<run-uuid>
+make reset
+```
+
+Open <http://127.0.0.1:3000/d/agentic-devops>. Use the returned trace ID in
+Grafana Explore with the Tempo datasource. The dashboard separates availability,
+diagnosis outcomes and scenario correctness. Read the
+[observability guide](docs/OBSERVABILITY_DEMO.md) for all six scenarios, telemetry
+retention, approval behavior and verification commands.
 
 ## Try the local simulation
 
@@ -80,11 +97,11 @@ Start with the [high-level design](docs/HIGH_LEVEL_DESIGN.md) for the complete
 user journey, architecture diagrams, approval flow, platform delivery,
 observability, and the boundary between current functionality and future stages.
 
-The diagram shows the M1 architecture and planned telemetry/M2 extension. T04/T05
+The diagram shows the M1 architecture and M2 extension. T04–T06
 deploy separate API, worker, tool gateway, orders, and database workloads with
 restricted network flows. The orders service owns the transaction containing
 the simulated restart, approval consumption, and deduplication result. The model
-adapter remains a component of the worker. Observability workloads are T06.
+adapter remains a component of the worker. Collector, Prometheus, Tempo and Grafana are deployed by T06.
 
 M1 uses deterministic responses and tool calls visibly labeled **SIMULATED**.
 It demonstrates platform operations and tool contracts; real model integration
@@ -99,7 +116,7 @@ belongs to M2.
 The durable worker claims jobs from PostgreSQL using atomic leases. The tool
 service validates identity, scope, arguments, approval, and idempotency. Simulated
 restart requires explicit user approval. Durable events are available by run ID;
-distributed logs, metrics, and traces are T06. See [ADR 0003](docs/decisions/0003-durable-execution.md).
+T06 correlates JSON logs, metrics and distributed traces. See [ADR 0003](docs/decisions/0003-durable-execution.md).
 
 | Technology | Planned responsibility |
 | --- | --- |
@@ -128,7 +145,7 @@ make doctor
 ```
 
 The T02 demo and regression tests use the standard library. T03 requires the
-pinned Psycopg dependency in `requirements.txt` and native PostgreSQL tools.
+pinned dependencies in `requirements.txt` and native PostgreSQL tools.
 HTTP tests use temporary localhost servers. Exact platform CLI pins are in
 [config/lab.json](config/lab.json).
 
@@ -142,14 +159,15 @@ that result as a broken QEMU installation.
 Available targets are `make doctor`, `make test`, `make run`, `make verify-local`,
 `make setup`, `make run-durable`, `make verify-durable`, `make bootstrap`,
 `make infra-plan`, `make infra-apply`, `make deploy`, `make ui`,
-`make verify-cluster`, and `make verify-network`. Full observability, CI,
-consolidated acceptance and scoped cleanup remain T06–T08.
+`make verify-cluster`, `make verify-network`, `make dashboards`, `make scenario`,
+`make reset`, `make logs`, and `make verify-observability`. CI, consolidated
+acceptance and scoped cleanup remain T07–T08.
 
 ## Isolation and access design
 
 The selected profile is `agentic-devops`, with driver `qemu2` and network `builtin`.
 The interface is accessible through a localhost port-forward; dashboard access
-will use the same local access pattern in T06. This QEMU network does not support `minikube service` or
+uses the same local access pattern. This QEMU network does not support `minikube service` or
 `minikube tunnel`; see the [QEMU decision](docs/decisions/0001-qemu-lab-profile.md).
 
 T03–T05 implement restricted database permissions, authenticated tool calls,
@@ -180,6 +198,8 @@ question. This is a local educational lab, not a production platform.
 | Document | Purpose |
 | --- | --- |
 | [PRD](docs/prd.md) | Scope, ownership boundaries, scenarios, and acceptance criteria |
+| [Observability demonstration](docs/OBSERVABILITY_DEMO.md) | Correlate runs, logs and traces; exercise controlled failures |
+| [Observability decision](docs/decisions/0005-observability-and-controlled-failures.md) | Trace propagation, metrics, retention and scenario/reset semantics |
 | [Platform demonstration](docs/PLATFORM_DEMO.md) | Bootstrap, deploy and verify the isolated Kubernetes lab |
 | [Platform decision](docs/decisions/0004-local-platform-and-network.md) | Resource ownership, effect transaction, and network flows |
 | [High-level design](docs/HIGH_LEVEL_DESIGN.md) | Complete solution, architecture diagrams, execution flow, and current versus target capabilities |

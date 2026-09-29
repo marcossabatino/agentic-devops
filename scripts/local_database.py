@@ -67,6 +67,7 @@ def local_database(root):
                         conn.execute(sql.SQL('CREATE ROLE {} LOGIN PASSWORD {}').format(
                             sql.Identifier(name), sql.Literal(config[role])))
                 conn.execute(MIGRATION.read_text())
+                conn.execute(MIGRATION.with_name("003_scenarios.sql").read_text())
             yield dsns, config
         finally:
             run('pg_ctl', '-D', str(data), '-m', 'fast', '-w', 'stop')

@@ -9,6 +9,7 @@ from psycopg.types.json import Jsonb
 
 from app.contracts import ARGUMENTS, RESTART_TOOL, Policy, Rejected, request, uuid_text
 from app.runtime import MODE
+from app import telemetry as tel
 
 
 class Database:
@@ -37,10 +38,13 @@ class Database:
                 (run_id,))]
             return run
 
+    @tel.traced("job.publish")
     def create(self, payload, revision):
         question, scenario = request(payload)
         run_id = str(uuid4())
-        data = dict(run_id=run_id, mode=MODE, revision=revision, question=question,
+        tel.enrich(run_id=run_id)
+        data = dict(run_id=run_id, trace_id=tel.trace_id(), trace_context=tel.carrier(),
+                    mode=MODE, revision=revision, question=question,
                     scenario=scenario, started_at=datetime.now(timezone.utc).isoformat(),
                     steps=[], outcome=None, error=None, summary='Waiting for a worker.',
                     duration_ms=0)
@@ -48,7 +52,7 @@ class Database:
             conn.execute('''INSERT INTO jobs
                 (run_id, data, status, deadline, max_steps, max_attempts)
                 VALUES (%s, %s, 'queued', clock_timestamp() + %s * interval '1 second', %s, %s)''',
-                (run_id, Jsonb(data), self.policy.deadline_seconds,
+                (run_id, Jsonb(data), min(self.policy.deadline_seconds, 0.2) if scenario == "deadline-exceeded" else self.policy.deadline_seconds,
                  self.policy.max_steps, self.policy.max_attempts))
         return self.get(run_id)
 
@@ -75,6 +79,9 @@ class Database:
                      AND attempts >= max_attempts)) RETURNING run_id, data''').fetchall()
             for row in expired:
                 self.event(conn, row['run_id'], 'failed', {'error': row['data']['error']})
+                with tel.span('job.expire', parent=row['data'].get('trace_context'), run_id=str(row['run_id']),
+                              status='failed', error_code=row['data']['error']) as current:
+                    current.set_status(tel.Status(tel.StatusCode.ERROR, row['data']['error']))
             row = conn.execute('''WITH candidate AS (
                 SELECT run_id FROM jobs WHERE deadline > clock_timestamp()
                 AND attempts < max_attempts AND
@@ -99,6 +106,7 @@ class Database:
             raise Rejected('LEASE_LOST', 409)
         return row
 
+    @tel.traced("step.reserve")
     def reserve_step(self, job, tool, arguments):
         with self.connect() as conn:
             row = self.locked(conn, job)
@@ -110,8 +118,10 @@ class Database:
                 WHERE run_id = %s''', (step, self.policy.lease_seconds, job['run_id']))
             self.event(conn, job['run_id'], 'tool_started',
                        {'step': step, 'tool': tool, 'arguments': arguments})
+            tel.enrich(step=step, tool=tool)
             return step
 
+    @tel.traced("step.persist")
     def record_step(self, job, step):
         with self.connect() as conn:
             row = self.locked(conn, job)
@@ -120,7 +130,9 @@ class Database:
             conn.execute('UPDATE jobs SET data = %s WHERE run_id = %s',
                          (Jsonb(data), job['run_id']))
             self.event(conn, job['run_id'], 'tool_' + step['status'], step)
+            tel.enrich(step=step['step'], tool=step['tool'], status=step['status'], error_code=step.get('error'))
 
+    @tel.traced("job.persist")
     def finish(self, job, status, **values):
         with self.connect() as conn:
             row = self.locked(conn, job)
@@ -135,7 +147,9 @@ class Database:
                 WHERE run_id = %s''',
                 (status, Jsonb(data), status, self.policy.approval_seconds, job['run_id']))
             self.event(conn, job['run_id'], status, values)
+            tel.enrich(status=status, error_code=values.get('error'))
 
+    @tel.traced("approval.persist")
     def approve(self, run_id, payload, identity):
         run_id = uuid_text(run_id)
         if (not isinstance(payload, dict) or set(payload) != {'tool', 'arguments'}
@@ -163,3 +177,12 @@ class Database:
                 deadline = clock_timestamp() + %s * interval '1 second' WHERE run_id = %s''',
                 (Jsonb(data), self.policy.deadline_seconds, run_id))
         return self.get(run_id)
+
+    def scenario(self, value=None):
+        from app.contracts import SCENARIOS
+        if value is not None and value not in SCENARIOS:
+            raise Rejected('INVALID_SCENARIO', 400)
+        with self.connect() as conn:
+            if value is not None:
+                conn.execute("UPDATE lab_settings SET scenario = %s WHERE singleton", (value,))
+            return conn.execute('SELECT scenario FROM lab_settings WHERE singleton').fetchone()['scenario']

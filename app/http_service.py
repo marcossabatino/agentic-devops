@@ -7,6 +7,7 @@ from urllib.parse import urlsplit
 import psycopg
 
 from app.contracts import Rejected
+from app import telemetry as tel
 
 
 class LocalServer(ThreadingHTTPServer):
@@ -24,6 +25,18 @@ def service_server(dispatch, port=0, bind_address='127.0.0.1', allowed_hosts=())
             pass
 
         def handle_request(self):
+            if self.command == 'POST':
+                route = '/tools/execute' if self.path == '/tools/execute' else '/api/runs'
+                if self.path.endswith('/approval'):
+                    route += '/{id}/approval'
+                if self.path == '/api/scenario':
+                    route = '/api/scenario'
+                with tel.span('HTTP POST ' + route, parent={key.lower(): value for key, value in self.headers.items()}, kind=tel.SpanKind.SERVER):
+                    self.respond()
+            else:
+                self.respond()
+
+        def respond(self):
             try:
                 host = self.headers.get('Host')
                 hostname = urlsplit('//' + (host or '')).hostname
@@ -64,6 +77,16 @@ def service_server(dispatch, port=0, bind_address='127.0.0.1', allowed_hosts=())
                 status, body, content_type = 503, {'error': 'DATABASE_UNAVAILABLE'}, 'application/json'
             except Exception:
                 status, body, content_type = 500, {'error': 'INTERNAL_ERROR'}, 'application/json'
+            if self.command == 'POST':
+                if (isinstance(body, dict) and body.get('run_id')
+                        and body.get('trace_id', tel.trace_id()) == tel.trace_id()):
+                    tel.enrich(run_id=body['run_id'])
+                if status >= 400:
+                    code = tel.error_code(body.get('error', 'INTERNAL_ERROR'))
+                    tel.enrich(status='failed', error_code=code)
+                    tel.trace.get_current_span().set_status(tel.Status(tel.StatusCode.ERROR, code))
+                    if status in (401, 403):
+                        tel.DENIED.labels(code).inc()
             encoded = body if isinstance(body, bytes) else json.dumps(body).encode()
             try:
                 self.send_response(status)
