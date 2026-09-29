@@ -286,7 +286,7 @@ to AWS is a separate architecture exercise, not an implied M2 requirement.
 
 ## 8. Current implementation versus complete solution
 
-| Capability | Now: T01–T06 | Remaining work |
+| Capability | Now: T01–T07 | Remaining work |
 | --- | --- | --- |
 | Local diagnosis UI and synthetic health evidence | Implemented locally and deployed in Kubernetes, with trace ID in the UI | Continued usability improvements |
 | Durable jobs, recovery, authentication, approval, deduplication | Tested with real PostgreSQL, HTTP and deployed services | Continued regression coverage |
@@ -295,7 +295,7 @@ to AWS is a separate architecture exercise, not an implied M2 requirement.
 | Network isolation | Default-deny, DNS, seven application and eleven telemetry paths; positive and negative TCP tests | Continued regression coverage |
 | Failure evidence | Correlated logs/traces, metrics/dashboard, timeout, step limit, deadline, scenario/reset and recovery tests | Consolidated M1 verification |
 | Metrics and runbook tools | Not implemented as dedicated tools | Complete the PRD catalog in T08 before M1 closes |
-| CI and deployment provenance | Local source revision and image content tag recorded | T07 GitHub checks/builds and validated deployment |
+| CI and deployment provenance | GitHub checks/build, intentional failure evidence and exact successful main SHA enforced at deploy | Registry publication remains outside local M1 |
 | Complete acceptance and cleanup | Local, cluster and network test/report commands | T08 consolidated verification, scoped cleanup, ten-minute demonstration |
 | Real model inference | No LLM calls | M2 / T09 Bedrock integration |
 

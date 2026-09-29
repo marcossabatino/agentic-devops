@@ -64,3 +64,7 @@ logs:
 
 verify-observability:
 	@python3 -B -m scripts.verify_observability
+
+.PHONY: verify-static
+verify-static:
+	@python3 -B -m scripts.ci_static

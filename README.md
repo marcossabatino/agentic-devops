@@ -11,11 +11,13 @@ verify that unauthorized connections and actions are rejected.
 
 ## Current status
 
-**T01–T06 are implemented and verified locally:** the durable simulated diagnosis
+**T01–T07 are implemented and verified:** the durable simulated diagnosis
 application runs in a dedicated QEMU/Calico Kubernetes cluster. Ansible bootstrap,
 OpenTofu platform resources, Helm deployment, persistent storage, and network
 isolation have executed acceptance evidence. Correlated logs, metrics, traces,
-Grafana dashboards and controlled failures are deployed. CI is the next increment.
+Grafana dashboards and controlled failures are deployed. GitHub CI validates
+tests, infrastructure manifests and the application image; local deployment is
+bound to the exact successful `main` commit.
 
 The platform includes separate API, worker, tool gateway and orders workloads;
 authenticated tools; approval-bound simulated restart; durable recovery and
@@ -37,7 +39,9 @@ make verify-observability
 make ui
 ```
 
-Inspect the plan before applying. Open <http://127.0.0.1:8080> and enter `user_token`
+Inspect the plan before applying. `make deploy` requires a clean `main` checkout
+matching `origin/main` and a successful CI push run for that exact commit. Open
+<http://127.0.0.1:8080> and enter `user_token`
 from the private `data/platform/credentials.json` file. Read the
 [platform demonstration](docs/PLATFORM_DEMO.md) for prerequisites, ownership,
 credentials, verification, and stopping the dedicated VM. All platform commands
@@ -160,8 +164,8 @@ Available targets are `make doctor`, `make test`, `make run`, `make verify-local
 `make setup`, `make run-durable`, `make verify-durable`, `make bootstrap`,
 `make infra-plan`, `make infra-apply`, `make deploy`, `make ui`,
 `make verify-cluster`, `make verify-network`, `make dashboards`, `make scenario`,
-`make reset`, `make logs`, and `make verify-observability`. CI, consolidated
-acceptance and scoped cleanup remain T07–T08.
+`make reset`, `make logs`, `make verify-static`, and `make verify-observability`.
+Consolidated acceptance and scoped cleanup remain T08.
 
 ## Isolation and access design
 
@@ -200,6 +204,8 @@ question. This is a local educational lab, not a production platform.
 | [PRD](docs/prd.md) | Scope, ownership boundaries, scenarios, and acceptance criteria |
 | [Observability demonstration](docs/OBSERVABILITY_DEMO.md) | Correlate runs, logs and traces; exercise controlled failures |
 | [Observability decision](docs/decisions/0005-observability-and-controlled-failures.md) | Trace propagation, metrics, retention and scenario/reset semantics |
+| [CI and validated deployment](docs/CI_DEMO.md) | GitHub checks, intentional failure evidence and exact-commit deployment |
+| [CI decision](docs/decisions/0006-ci-and-deployment-provenance.md) | Workflow boundaries and the fail-closed provenance gate |
 | [Platform demonstration](docs/PLATFORM_DEMO.md) | Bootstrap, deploy and verify the isolated Kubernetes lab |
 | [Platform decision](docs/decisions/0004-local-platform-and-network.md) | Resource ownership, effect transaction, and network flows |
 | [High-level design](docs/HIGH_LEVEL_DESIGN.md) | Complete solution, architecture diagrams, execution flow, and current versus target capabilities |

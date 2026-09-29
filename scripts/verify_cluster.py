@@ -3,7 +3,6 @@
 from contextlib import contextmanager
 from http.client import HTTPConnection
 import json
-from pathlib import Path
 import re
 import subprocess
 import tempfile
@@ -87,6 +86,15 @@ def verify():
         for namespace, component in [('lab-app', 'api'), ('lab-app', 'worker'),
                                      ('lab-tools', 'tools'), ('lab-tools', 'orders')]:
             kubectl('-n', namespace, 'rollout', 'status', 'deployment/' + component, '--timeout=120s', capture=True)
+            deployment = json.loads(kubectl('-n', namespace, 'get', 'deployment', component,
+                                            '-o', 'json', capture=True).stdout)
+            container = deployment['spec']['template']['spec']['containers'][0]
+            env_values = {item['name']: item.get('value') for item in container['env']}
+            check(component + '_matches_validated_commit',
+                  container['image'] == build['image']
+                  and env_values['SOURCE_REVISION'] == build['source_revision']
+                  and len(build['source_revision']) == 40
+                  and bool(build.get('ci_run_id')))
         kubectl('-n', 'lab-data', 'rollout', 'status', 'statefulset/postgres', '--timeout=120s', capture=True)
         check('all_application_workloads_ready', True)
         nodes = json.loads(kubectl('get', 'nodes', '-o', 'json', capture=True).stdout)['items']
@@ -101,12 +109,16 @@ def verify():
             check(namespace + '_services_internal_only', all(s['spec']['type'] == 'ClusterIP' for s in services))
         with port_forward('lab-app', 'service/api') as port:
             check('api_through_loopback_port_forward', request(port, '/healthz')[0] == 200)
+            check('api_info_identifies_validated_commit',
+                  request(port, '/api/info')[1]['revision'] == build['source_revision'])
             check('api_requires_authentication', request(port, '/api/runs', payload={'question': 'Health?', 'scenario': 'healthy'})[0] == 401)
             for scenario in ('healthy', 'orders-errors', 'restart-required', 'tool-timeout', 'step-limit'):
                 status, run = request(port, '/api/runs', config['user_token'], {'question': 'Verify cluster behavior', 'scenario': scenario})
                 check(scenario + '_accepted', status == 202)
                 runs[scenario] = run['run_id']
                 run = poll(port, run['run_id'], config['user_token'])
+                check(scenario + '_history_identifies_validated_commit',
+                      run['revision'] == build['source_revision'])
                 if scenario == 'restart-required':
                     check('restart_waits_for_approval', run['status'] == 'awaiting_approval')
                     status, _ = request(port, '/api/runs/' + run['run_id'] + '/approval', config['user_token'], run['pending_approval'])
